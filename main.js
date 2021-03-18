@@ -626,4 +626,4 @@ define("Game/Classes/Points", ["require", "exports"], function (require, exports
 //        return Math.max(titleWidth, textWidth, costWidth) + 10;
 //    }
 //}
-//# sourceMappingURL=main.js.map
+//# sourceMappingURL=Main.js.map
