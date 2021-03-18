@@ -386,20 +386,42 @@ define("Game/Classes/Colours", ["require", "exports", "Boilerplate/Classes/Colou
         Colours.cyan = new Colour_1.Colour(0, 255, 255);
         Colours.blue = new Colour_1.Colour(0, 0, 255);
         Colours.magenta = new Colour_1.Colour(255, 0, 255);
+        Colours.boxBorderColour = new Colour_1.Colour(16, 16, 16);
+        Colours.boxCoveredColour = new Colour_1.Colour(48, 48, 48);
+        Colours.boxUncoveredColour = new Colour_1.Colour(80, 80, 80);
+        Colours.boxBombColour = new Colour_1.Colour(240, 80, 80);
         return Colours;
     }());
     exports.Colours = Colours;
 });
-define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Colour", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Enums/CellStates", "Game/Enums/CellTypes", "Game/Classes/Colours"], function (require, exports, Colour_2, Vector2_3, Align_2, Fonts_1, MouseButton_3, Functions_1, CellStates_1, CellTypes_1, Colours_1) {
+define("Game/Classes/Points", ["require", "exports", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Game/Classes/Colours"], function (require, exports, Align_2, Fonts_1, Colours_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Points = void 0;
+    var Points = /** @class */ (function () {
+        function Points() {
+            this.points = 0;
+        }
+        Points.prototype.draw = function (context) {
+            var pointsText = "Points: " + this.points;
+            var measurement = context.measureString(pointsText, 30, Fonts_1.Fonts.Arial);
+            var rectX = 20;
+            var rectY = context.canvas.height - 70;
+            var rectW = measurement.width + 20;
+            var rectH = 50;
+            context.drawBorderedRectangle(20, context.canvas.height - (20 + 50), measurement.width + 20, 50, Colours_1.Colours.boxUncoveredColour, Colours_1.Colours.boxBorderColour);
+            context.drawString(pointsText, rectX + rectW / 2, rectY + rectH / 2, 30, Fonts_1.Fonts.Arial, Colours_1.Colours.boxBorderColour, Align_2.Align.Center);
+        };
+        return Points;
+    }());
+    exports.Points = Points;
+});
+define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Enums/CellStates", "Game/Enums/CellTypes", "Game/Classes/Colours"], function (require, exports, Vector2_3, Align_3, Fonts_2, MouseButton_3, Functions_1, CellStates_1, CellTypes_1, Colours_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Grid = void 0;
     var Grid = /** @class */ (function () {
         function Grid(width, height) {
-            this.boxBorderColour = new Colour_2.Colour(16, 16, 16);
-            this.boxCoveredColour = new Colour_2.Colour(48, 48, 48);
-            this.boxUncoveredColour = new Colour_2.Colour(80, 80, 80);
-            this.boxBombColour = new Colour_2.Colour(240, 80, 80);
             this.cellValues = Functions_1.createMultidimensionalArray(width, height, 0);
             this.cellTypes = Functions_1.createMultidimensionalArray(width, height, CellTypes_1.CellTypes.Clear);
             this.cellStates = Functions_1.createMultidimensionalArray(width, height, CellStates_1.CellStates.Covered);
@@ -408,7 +430,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Colour",
             this.cellTypes[4][4] = CellTypes_1.CellTypes.Mine;
             this.calculateCellValues();
         }
-        Grid.prototype.update = function (camera, input) {
+        Grid.prototype.update = function (camera, input, points) {
             if (input.isReleased(MouseButton_3.MouseButton.Left) && !input.getHasLeftDownPositionChanged() && !input.getLeftUsed()) {
                 var mousePos = new Vector2_3.Vector2();
                 mousePos.x = input.getX();
@@ -416,8 +438,11 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Colour",
                 var worldPos = camera.getCameraToWorldOffset(mousePos);
                 var x = Number.parseInt((worldPos.x / 64 - 0.5).toFixed(0));
                 var y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
-                if (x >= 0 && x < this.width && y >= 0 && y < this.height)
+                if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
                     this.cellStates[x][y] = CellStates_1.CellStates.Uncovered;
+                    if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear)
+                        points.points += 1 + this.cellValues[x][y];
+                }
             }
         };
         Grid.prototype.draw = function (context, camera) {
@@ -428,19 +453,18 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Colour",
                     position.x = x * 64;
                     position.y = y * 64;
                     offset = camera.getWorldToCameraOffset(position);
-                    // context.drawRectangle(offset.x, offset.y, 64, 64, this.boxBorderColour, false);
                     if (this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64, 64, this.boxCoveredColour, this.boxBorderColour);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours_2.Colours.boxCoveredColour, Colours_2.Colours.boxBorderColour);
                     }
                     else if (this.cellStates[x][y] === CellStates_1.CellStates.Uncovered) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64, 64, this.boxUncoveredColour, this.boxBorderColour);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours_2.Colours.boxUncoveredColour, Colours_2.Colours.boxBorderColour);
                         if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine) {
-                            context.drawFillRectangle(offset.x + 9, offset.y + 9, 46, 46, this.boxBombColour);
+                            context.drawFillRectangle(offset.x + 9, offset.y + 9, 46, 46, Colours_2.Colours.boxBombColour);
                         }
                         else if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear) {
                             var cellValue = this.cellValues[x][y];
                             if (cellValue !== 0)
-                                context.drawString(cellValue.toString(), offset.x + 32, offset.y + 32, 30, Fonts_1.Fonts.Arial, Colours_1.Colours.magenta, Align_2.Align.Center);
+                                context.drawString(cellValue.toString(), offset.x + 32, offset.y + 32, 30, Fonts_2.Fonts.Arial, Colours_2.Colours.magenta, Align_3.Align.Center);
                         }
                         //TODO: create global/passable font and colour classes
                     }
@@ -523,7 +547,7 @@ define("Boilerplate/Classes/GameBase", ["require", "exports", "Boilerplate/Class
     }());
     exports.GameBase = GameBase;
 });
-define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Classes/Camera", "Boilerplate/Classes/Vector2", "Boilerplate/Classes/GameBase"], function (require, exports, Grid_1, Camera_1, Vector2_4, GameBase_1) {
+define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Classes/Camera", "Boilerplate/Classes/Vector2", "Boilerplate/Classes/GameBase", "Game/Classes/Points"], function (require, exports, Grid_1, Camera_1, Vector2_4, GameBase_1, Points_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Game = void 0;
@@ -538,13 +562,15 @@ define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Cl
             this.camera.position = new Vector2_4.Vector2();
             this.camera.position.x = -100;
             this.camera.position.y = -50;
+            this.points = new Points_1.Points();
         };
         Game.prototype.update = function () {
             this.camera.update(this.input);
-            this.grid.update(this.camera, this.input);
+            this.grid.update(this.camera, this.input, this.points);
         };
         Game.prototype.draw = function () {
             this.grid.draw(this.context, this.camera);
+            this.points.draw(this.context);
         };
         return Game;
     }(GameBase_1.GameBase));
@@ -571,17 +597,6 @@ function setupImages() {
     }
 }
 var images = {};
-define("Game/Classes/Points", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Points = void 0;
-    var Points = /** @class */ (function () {
-        function Points() {
-        }
-        return Points;
-    }());
-    exports.Points = Points;
-});
 //class Tooltip {
 //    constructor(
 //        public title: string,

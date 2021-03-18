@@ -10,6 +10,7 @@ import { CellStates } from "../Enums/CellStates";
 import { CellTypes } from "../Enums/CellTypes";
 import { Camera } from "./Camera";
 import { Colours } from "./Colours";
+import { Points } from "./Points";
 
 export class Grid {
     private cellValues: number[][];
@@ -17,10 +18,6 @@ export class Grid {
     private cellStates: CellStates[][];
     private width: number;
     private height: number;
-    private boxBorderColour: Colour = new Colour(16, 16, 16);
-    private boxCoveredColour: Colour = new Colour(48, 48, 48);
-    private boxUncoveredColour: Colour = new Colour(80, 80, 80);
-    private boxBombColour: Colour = new Colour(240, 80, 80);
 
     constructor(width: number, height: number) {
         this.cellValues = createMultidimensionalArray(width, height, 0);
@@ -34,7 +31,7 @@ export class Grid {
         this.calculateCellValues();
     }
 
-    update(camera: Camera, input: Input) {
+    update(camera: Camera, input: Input, points: Points) {
         if (input.isReleased(MouseButton.Left) && !input.getHasLeftDownPositionChanged() && !input.getLeftUsed()) {
             const mousePos = new Vector2();
             mousePos.x = input.getX();
@@ -43,8 +40,12 @@ export class Grid {
             const x = Number.parseInt((worldPos.x / 64 - 0.5).toFixed(0));
             const y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
 
-            if (x >= 0 && x < this.width && y >= 0 && y < this.height)
+            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
                 this.cellStates[x][y] = CellStates.Uncovered;
+
+                if (this.cellTypes[x][y] === CellTypes.Clear)
+                    points.points += 1 + this.cellValues[x][y];
+            }
         }
     }
 
@@ -57,16 +58,15 @@ export class Grid {
                 position.x = x * 64;
                 position.y = y * 64;
                 offset = camera.getWorldToCameraOffset(position);
-                // context.drawRectangle(offset.x, offset.y, 64, 64, this.boxBorderColour, false);
 
                 if (this.cellStates[x][y] === CellStates.Covered) {
-                    context.drawBorderedRectangle(offset.x, offset.y, 64, 64, this.boxCoveredColour, this.boxBorderColour);
+                    context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours.boxCoveredColour, Colours.boxBorderColour);
                 }
                 else if (this.cellStates[x][y] === CellStates.Uncovered) {
-                    context.drawBorderedRectangle(offset.x, offset.y, 64, 64, this.boxUncoveredColour, this.boxBorderColour);
+                    context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours.boxUncoveredColour, Colours.boxBorderColour);
 
                     if (this.cellTypes[x][y] === CellTypes.Mine) {
-                        context.drawFillRectangle(offset.x + 9, offset.y + 9, 46, 46, this.boxBombColour);
+                        context.drawFillRectangle(offset.x + 9, offset.y + 9, 46, 46, Colours.boxBombColour);
                     }
                     else if (this.cellTypes[x][y] === CellTypes.Clear) {
                         const cellValue = this.cellValues[x][y];
