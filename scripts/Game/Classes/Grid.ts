@@ -5,7 +5,7 @@ import { Vector2 } from "../../Boilerplate/Classes/Vector2";
 import { Align } from "../../Boilerplate/Enums/Align";
 import { Fonts } from "../../Boilerplate/Enums/Fonts";
 import { MouseButton } from "../../Boilerplate/Enums/MouseButton";
-import { createMultidimensionalArray } from "../../Boilerplate/Functions";
+import { createMultidimensionalArray, randomInt } from "../../Boilerplate/Functions";
 import { CellStates } from "../Enums/CellStates";
 import { CellTypes } from "../Enums/CellTypes";
 import { Camera } from "./Camera";
@@ -27,6 +27,8 @@ export class Grid {
         this.height = height;
 
         this.cellTypes[4][4] = CellTypes.Mine;
+
+        this.generateMines();
 
         this.calculateCellValues();
     }
@@ -74,8 +76,6 @@ export class Grid {
                         if (cellValue !== 0)
                             context.drawString(cellValue.toString(), offset.x + 32, offset.y + 32, 30, Fonts.Arial, Colours.magenta, Align.Center);
                     }
-
-                    //TODO: create global/passable font and colour classes
                 }
             }
         }
@@ -109,5 +109,32 @@ export class Grid {
             return false;
 
         return this.cellTypes[x][y] === CellTypes.Mine;
+    }
+
+    generateMines() {
+        let minesLeft = 150;
+
+        for (let x = this.width / 2 - 2; x < this.width / 2 + 2; x++) {
+            for (let y = this.height / 2 - 2; y < this.height / 2 + 2; y++) {
+                this.cellTypes[x][y] = CellTypes.Mine;
+            }
+        }
+
+        while (minesLeft > 0) {
+            const x = randomInt(0, this.width - 1);
+            const y = randomInt(0, this.height - 1);
+
+            if (this.cellTypes[x][y] !== CellTypes.Mine) {
+                this.cellTypes[x][y] = CellTypes.Mine;
+                minesLeft--;
+            }
+        }
+
+        for (let x = this.width / 2 - 2; x < this.width / 2 + 2; x++) {
+            for (let y = this.height / 2 - 2; y < this.height / 2 + 2; y++) {
+                this.cellTypes[x][y] = CellTypes.Clear;
+                this.cellStates[x][y] = CellStates.Uncovered;
+            }
+        }
     }
 }

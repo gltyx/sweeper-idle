@@ -297,7 +297,7 @@ define("Boilerplate/Classes/Input", ["require", "exports", "Boilerplate/Classes/
 define("Boilerplate/Functions", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.createMultidimensionalArray = exports.pointWithinRectangle = void 0;
+    exports.randomInt = exports.createMultidimensionalArray = exports.pointWithinRectangle = void 0;
     function pointWithinRectangle(px, py, rx, ry, rw, rh) {
         return px >= rx
             && px <= rx + rw
@@ -317,6 +317,12 @@ define("Boilerplate/Functions", ["require", "exports"], function (require, expor
         return multiArray;
     }
     exports.createMultidimensionalArray = createMultidimensionalArray;
+    function randomInt(lower, upper) {
+        var difference = (upper + 1) - lower;
+        var random = Math.random() * difference;
+        return Math.ceil(random + lower) - 1;
+    }
+    exports.randomInt = randomInt;
 });
 define("Game/Enums/CellStates", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -428,6 +434,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
             this.width = width;
             this.height = height;
             this.cellTypes[4][4] = CellTypes_1.CellTypes.Mine;
+            this.generateMines();
             this.calculateCellValues();
         }
         Grid.prototype.update = function (camera, input, points) {
@@ -466,7 +473,6 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                             if (cellValue !== 0)
                                 context.drawString(cellValue.toString(), offset.x + 32, offset.y + 32, 30, Fonts_2.Fonts.Arial, Colours_2.Colours.magenta, Align_3.Align.Center);
                         }
-                        //TODO: create global/passable font and colour classes
                     }
                 }
             }
@@ -496,6 +502,28 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
             if (x < 0 || x >= this.width || y < 0 || y > this.height)
                 return false;
             return this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine;
+        };
+        Grid.prototype.generateMines = function () {
+            var minesLeft = 150;
+            for (var x = this.width / 2 - 2; x < this.width / 2 + 2; x++) {
+                for (var y = this.height / 2 - 2; y < this.height / 2 + 2; y++) {
+                    this.cellTypes[x][y] = CellTypes_1.CellTypes.Mine;
+                }
+            }
+            while (minesLeft > 0) {
+                var x = Functions_1.randomInt(0, this.width - 1);
+                var y = Functions_1.randomInt(0, this.height - 1);
+                if (this.cellTypes[x][y] !== CellTypes_1.CellTypes.Mine) {
+                    this.cellTypes[x][y] = CellTypes_1.CellTypes.Mine;
+                    minesLeft--;
+                }
+            }
+            for (var x = this.width / 2 - 2; x < this.width / 2 + 2; x++) {
+                for (var y = this.height / 2 - 2; y < this.height / 2 + 2; y++) {
+                    this.cellTypes[x][y] = CellTypes_1.CellTypes.Clear;
+                    this.cellStates[x][y] = CellStates_1.CellStates.Uncovered;
+                }
+            }
         };
         return Grid;
     }());
@@ -557,7 +585,7 @@ define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Cl
             return _super !== null && _super.apply(this, arguments) || this;
         }
         Game.prototype.initialize = function () {
-            this.grid = new Grid_1.Grid(10, 10);
+            this.grid = new Grid_1.Grid(32, 32);
             this.camera = new Camera_1.Camera();
             this.camera.position = new Vector2_4.Vector2();
             this.camera.position.x = -100;

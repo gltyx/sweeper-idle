@@ -18,3 +18,9 @@ export function createMultidimensionalArray<TValue>(width: number, height: numbe
 
     return multiArray;
 }
+
+export function randomInt(lower: number, upper: number): number {
+    const difference = (upper + 1) - lower;
+    const random = Math.random() * difference;
+    return Math.ceil(random + lower) - 1;
+}
