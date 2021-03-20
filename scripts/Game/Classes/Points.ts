@@ -8,7 +8,7 @@ export class Points {
 
     draw(context: Context2D) {
         const pointsText = `Points: ${this.points}`;
-        const measurement = context.measureString(pointsText, 30, Fonts.Arial);
+        const measurement = context.measureString(pointsText, 30, Fonts.Arial, Align.Center);
 
         const rectX = 20;
         const rectY = context.canvas.height - 70;

@@ -90,7 +90,31 @@ define("Boilerplate/Classes/Context2D", ["require", "exports", "Boilerplate/Enum
     };
     CanvasRenderingContext2D.prototype.drawString = function (text, x, y, size, font, colour, align) {
         this.fillStyle = colour.getHexString();
-        this.font = size + "px " + font;
+        this.setFont(font, size);
+        this.setAlign(align);
+        this.fillText(text, x, y);
+    };
+    CanvasRenderingContext2D.prototype.measureString = function (text, size, font, align) {
+        this.setFont(font, size);
+        this.setAlign(align);
+        return this.measureText(text);
+    };
+    CanvasRenderingContext2D.prototype.drawFillRectangle = function (x, y, w, h, colour) {
+        this.fillStyle = colour.getHexString();
+        this.fillRect(x, y, w, h);
+    };
+    CanvasRenderingContext2D.prototype.drawStrokeRectangle = function (x, y, w, h, colour, lineWidth) {
+        if (lineWidth === void 0) { lineWidth = 2; }
+        this.strokeStyle = colour.getHexString();
+        this.lineWidth = lineWidth;
+        this.strokeRect(x, y, w, h);
+    };
+    CanvasRenderingContext2D.prototype.drawBorderedRectangle = function (x, y, w, h, fillColour, borderColour, lineWidth) {
+        if (lineWidth === void 0) { lineWidth = 2; }
+        this.drawFillRectangle(x, y, w, h, fillColour);
+        this.drawStrokeRectangle(x, y, w, h, borderColour, lineWidth);
+    };
+    CanvasRenderingContext2D.prototype.setAlign = function (align) {
         if (align === Align_1.Align.Bottom
             || align === Align_1.Align.BottomLeft
             || align === Align_1.Align.BottomRight)
@@ -111,26 +135,9 @@ define("Boilerplate/Classes/Context2D", ["require", "exports", "Boilerplate/Enum
             this.textAlign = "right";
         else
             this.textAlign = "center";
-        this.fillText(text, x, y);
     };
-    CanvasRenderingContext2D.prototype.measureString = function (text, size, font) {
+    CanvasRenderingContext2D.prototype.setFont = function (font, size) {
         this.font = size + "px " + font;
-        return this.measureText(text);
-    };
-    CanvasRenderingContext2D.prototype.drawFillRectangle = function (x, y, w, h, colour) {
-        this.fillStyle = colour.getHexString();
-        this.fillRect(x, y, w, h);
-    };
-    CanvasRenderingContext2D.prototype.drawStrokeRectangle = function (x, y, w, h, colour, lineWidth) {
-        if (lineWidth === void 0) { lineWidth = 2; }
-        this.strokeStyle = colour.getHexString();
-        this.lineWidth = lineWidth;
-        this.strokeRect(x, y, w, h);
-    };
-    CanvasRenderingContext2D.prototype.drawBorderedRectangle = function (x, y, w, h, fillColour, borderColour, lineWidth) {
-        if (lineWidth === void 0) { lineWidth = 2; }
-        this.drawFillRectangle(x, y, w, h, fillColour);
-        this.drawStrokeRectangle(x, y, w, h, borderColour, lineWidth);
     };
 });
 define("Boilerplate/Enums/Scroll", ["require", "exports"], function (require, exports) {
@@ -467,7 +474,7 @@ define("Game/Classes/Points", ["require", "exports", "Boilerplate/Enums/Align", 
         }
         Points.prototype.draw = function (context) {
             var pointsText = "Points: " + this.points;
-            var measurement = context.measureString(pointsText, 30, Fonts_1.Fonts.Arial);
+            var measurement = context.measureString(pointsText, 30, Fonts_1.Fonts.Arial, Align_2.Align.Center);
             var rectX = 20;
             var rectY = context.canvas.height - 70;
             var rectW = measurement.width + 20;

@@ -7,7 +7,9 @@ export type Context2D = CanvasRenderingContext2D;
 declare global {
     interface CanvasRenderingContext2D {
         drawString(text: string, x: number, y: number, size: number, font: Fonts, colour: Colour, align: Align): void;
-        measureString(text: string, size: number, font: Fonts): TextMetrics;
+        measureString(text: string, size: number, font: Fonts, align: Align): TextMetrics;
+        setAlign(align: Align): void;
+        setFont(font: Fonts, size: number): void;
         drawFillRectangle(x: number, y: number, w: number, h: number, colour: Colour): void;
         drawStrokeRectangle(x: number, y: number, w: number, h: number, colour: Colour, lineWidth: number): void;
         drawBorderedRectangle(x: number, y: number, w: number, h: number, fillColour: Colour, borderColour: Colour): void;
@@ -24,8 +26,39 @@ HTMLCanvasElement.prototype.getContext2D = function () {
 
 CanvasRenderingContext2D.prototype.drawString = function (text: string, x: number, y: number, size: number, font: Fonts, colour: Colour, align: Align) {
     this.fillStyle = colour.getHexString();
-    this.font = `${size}px ${font}`;
 
+    this.setFont(font, size);
+
+    this.setAlign(align);
+
+    this.fillText(text, x, y);
+}
+
+CanvasRenderingContext2D.prototype.measureString = function (text: string, size: number, font: string, align: Align) {
+    this.setFont(font, size);
+
+    this.setAlign(align);
+
+    return this.measureText(text);
+}
+
+CanvasRenderingContext2D.prototype.drawFillRectangle = function (x: number, y: number, w: number, h: number, colour: Colour) {
+    this.fillStyle = colour.getHexString();
+    this.fillRect(x, y, w, h);
+}
+
+CanvasRenderingContext2D.prototype.drawStrokeRectangle = function (x: number, y: number, w: number, h: number, colour: Colour, lineWidth: number = 2) {
+    this.strokeStyle = colour.getHexString();
+    this.lineWidth = lineWidth;
+    this.strokeRect(x, y, w, h);
+}
+
+CanvasRenderingContext2D.prototype.drawBorderedRectangle = function (x: number, y: number, w: number, h: number, fillColour: Colour, borderColour: Colour, lineWidth: number = 2) {
+    this.drawFillRectangle(x, y, w, h, fillColour);
+    this.drawStrokeRectangle(x, y, w, h, borderColour, lineWidth);
+}
+
+CanvasRenderingContext2D.prototype.setAlign = function (align: Align) {
     if (align === Align.Bottom
         || align === Align.BottomLeft
         || align === Align.BottomRight)
@@ -47,27 +80,8 @@ CanvasRenderingContext2D.prototype.drawString = function (text: string, x: numbe
         this.textAlign = "right"
     else
         this.textAlign = "center";
-
-    this.fillText(text, x, y);
 }
 
-CanvasRenderingContext2D.prototype.measureString = function (text: string, size: number, font: string) {
+CanvasRenderingContext2D.prototype.setFont = function (font: Fonts, size: number) {
     this.font = `${size}px ${font}`;
-    return this.measureText(text);
-}
-
-CanvasRenderingContext2D.prototype.drawFillRectangle = function (x: number, y: number, w: number, h: number, colour: Colour) {
-    this.fillStyle = colour.getHexString();
-    this.fillRect(x, y, w, h);
-}
-
-CanvasRenderingContext2D.prototype.drawStrokeRectangle = function (x: number, y: number, w: number, h: number, colour: Colour, lineWidth: number = 2) {
-    this.strokeStyle = colour.getHexString();
-    this.lineWidth = lineWidth;
-    this.strokeRect(x, y, w, h);
-}
-
-CanvasRenderingContext2D.prototype.drawBorderedRectangle = function (x: number, y: number, w: number, h: number, fillColour: Colour, borderColour: Colour, lineWidth: number = 2) {
-    this.drawFillRectangle(x, y, w, h, fillColour);
-    this.drawStrokeRectangle(x, y, w, h, borderColour, lineWidth);
 }
