@@ -26,11 +26,11 @@ export class Grid {
         this.width = width;
         this.height = height;
 
-        this.cellTypes[4][4] = CellTypes.Mine;
-
         this.generateMines();
 
         this.calculateCellValues();
+
+        this.revealFromCell(this.width / 2, this.height / 2)
     }
 
     update(camera: Camera, input: Input, points: Points) {
@@ -43,10 +43,12 @@ export class Grid {
             const y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
 
             if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-                this.cellStates[x][y] = CellStates.Uncovered;
-
                 if (this.cellTypes[x][y] === CellTypes.Clear)
-                    points.points += 1 + this.cellValues[x][y];
+                    this.revealFromCell(x, y, points);
+                else {
+                    this.cellStates[x][y] = CellStates.Uncovered;
+                    points.points = 0;
+                }
             }
         }
     }
@@ -133,8 +135,49 @@ export class Grid {
         for (let x = this.width / 2 - 2; x < this.width / 2 + 2; x++) {
             for (let y = this.height / 2 - 2; y < this.height / 2 + 2; y++) {
                 this.cellTypes[x][y] = CellTypes.Clear;
-                this.cellStates[x][y] = CellStates.Uncovered;
             }
         }
+    }
+
+    revealFromCell(x: number, y: number, points?: Points) {
+        const openCells: number[][] = [];
+        const closedCells: number[][] = [];
+
+        openCells.push([x, y]);
+
+        while (openCells.length > 0) {
+            const cell = openCells.pop();
+            closedCells.push(cell);
+
+            this.cellStates[cell[0]][cell[1]] = CellStates.Uncovered;
+
+            if (points) {
+                points.points += this.cellValues[cell[0]][cell[1]] + 1;
+            }
+
+            if (this.cellValues[cell[0]][cell[1]] === 0) {
+                this.getSurroundingCells(cell[0], cell[1])
+                    .filter(surroundingCell => closedCells
+                        .every(closedCell => closedCell[0] !== surroundingCell[0] || closedCell[1] !== surroundingCell[1]))
+                    .filter(surroundingCell => openCells
+                        .every(openCell => openCell[0] !== surroundingCell[0] || openCell[1] !== surroundingCell[1]))
+                    .forEach(surroundingCell => openCells.push(surroundingCell));
+            }
+        }
+    }
+
+    getSurroundingCells(x: number, y: number) {
+        let cells = [
+            [x - 1, y - 1],
+            [x - 1, y],
+            [x - 1, y + 1],
+            [x, y - 1],
+            [x, y + 1],
+            [x + 1, y - 1],
+            [x + 1, y],
+            [x + 1, y + 1],
+        ];
+
+        return cells.filter(cell => cell[0] >= 0 && cell[0] < this.width && cell[1] >= 0 && cell[1] < this.height);
     }
 }
