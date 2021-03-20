@@ -433,9 +433,9 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
             this.cellStates = Functions_1.createMultidimensionalArray(width, height, CellStates_1.CellStates.Covered);
             this.width = width;
             this.height = height;
-            this.cellTypes[4][4] = CellTypes_1.CellTypes.Mine;
             this.generateMines();
             this.calculateCellValues();
+            this.revealFromCell(this.width / 2, this.height / 2);
         }
         Grid.prototype.update = function (camera, input, points) {
             if (input.isReleased(MouseButton_3.MouseButton.Left) && !input.getHasLeftDownPositionChanged() && !input.getLeftUsed()) {
@@ -446,9 +446,12 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                 var x = Number.parseInt((worldPos.x / 64 - 0.5).toFixed(0));
                 var y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
                 if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-                    this.cellStates[x][y] = CellStates_1.CellStates.Uncovered;
                     if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear)
-                        points.points += 1 + this.cellValues[x][y];
+                        this.revealFromCell(x, y, points);
+                    else {
+                        this.cellStates[x][y] = CellStates_1.CellStates.Uncovered;
+                        points.points = 0;
+                    }
                 }
             }
         };
@@ -504,7 +507,8 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
             return this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine;
         };
         Grid.prototype.generateMines = function () {
-            var minesLeft = 150;
+            var mineAmount = 0.25;
+            var minesLeft = Math.round(((this.width * this.height) - 16) * mineAmount);
             for (var x = this.width / 2 - 2; x < this.width / 2 + 2; x++) {
                 for (var y = this.height / 2 - 2; y < this.height / 2 + 2; y++) {
                     this.cellTypes[x][y] = CellTypes_1.CellTypes.Mine;
@@ -521,9 +525,43 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
             for (var x = this.width / 2 - 2; x < this.width / 2 + 2; x++) {
                 for (var y = this.height / 2 - 2; y < this.height / 2 + 2; y++) {
                     this.cellTypes[x][y] = CellTypes_1.CellTypes.Clear;
-                    this.cellStates[x][y] = CellStates_1.CellStates.Uncovered;
                 }
             }
+        };
+        Grid.prototype.revealFromCell = function (x, y, points) {
+            var openCells = [];
+            var closedCells = [];
+            openCells.push([x, y]);
+            while (openCells.length > 0) {
+                var cell = openCells.pop();
+                closedCells.push(cell);
+                this.cellStates[cell[0]][cell[1]] = CellStates_1.CellStates.Uncovered;
+                if (points) {
+                    points.points += this.cellValues[cell[0]][cell[1]] + 1;
+                }
+                if (this.cellValues[cell[0]][cell[1]] === 0) {
+                    this.getSurroundingCells(cell[0], cell[1])
+                        .filter(function (surroundingCell) { return closedCells
+                        .every(function (closedCell) { return closedCell[0] !== surroundingCell[0] || closedCell[1] !== surroundingCell[1]; }); })
+                        .filter(function (surroundingCell) { return openCells
+                        .every(function (openCell) { return openCell[0] !== surroundingCell[0] || openCell[1] !== surroundingCell[1]; }); })
+                        .forEach(function (surroundingCell) { return openCells.push(surroundingCell); });
+                }
+            }
+        };
+        Grid.prototype.getSurroundingCells = function (x, y) {
+            var _this = this;
+            var cells = [
+                [x - 1, y - 1],
+                [x - 1, y],
+                [x - 1, y + 1],
+                [x, y - 1],
+                [x, y + 1],
+                [x + 1, y - 1],
+                [x + 1, y],
+                [x + 1, y + 1],
+            ];
+            return cells.filter(function (cell) { return cell[0] >= 0 && cell[0] < _this.width && cell[1] >= 0 && cell[1] < _this.height; });
         };
         return Grid;
     }());
@@ -585,7 +623,7 @@ define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Cl
             return _super !== null && _super.apply(this, arguments) || this;
         }
         Game.prototype.initialize = function () {
-            this.grid = new Grid_1.Grid(32, 32);
+            this.grid = new Grid_1.Grid(64, 64);
             this.camera = new Camera_1.Camera();
             this.camera.position = new Vector2_4.Vector2();
             this.camera.position.x = -100;

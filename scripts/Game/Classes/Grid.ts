@@ -114,7 +114,9 @@ export class Grid {
     }
 
     generateMines() {
-        let minesLeft = 150;
+        const mineAmount = 0.25;
+
+        let minesLeft = Math.round(((this.width * this.height) - 16) * mineAmount);
 
         for (let x = this.width / 2 - 2; x < this.width / 2 + 2; x++) {
             for (let y = this.height / 2 - 2; y < this.height / 2 + 2; y++) {

@@ -10,7 +10,7 @@ export class Game extends GameBase {
     points: Points;
 
     initialize() {
-        this.grid = new Grid(32, 32);
+        this.grid = new Grid(64, 64);
 
         this.camera = new Camera();
         this.camera.position = new Vector2();
