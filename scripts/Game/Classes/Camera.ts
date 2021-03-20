@@ -3,7 +3,7 @@ import { Vector2 } from "../../Boilerplate/Classes/Vector2"
 import { MouseButton } from "../../Boilerplate/Enums/MouseButton";
 
 export class Camera {
-    public position: Vector2;
+    public position = new Vector2();
     private cameraStuck = true;
 
     constructor() { }
@@ -31,5 +31,10 @@ export class Camera {
         else {
             this.cameraStuck = true;
         }
+    }
+
+    centerOnPosition(position: Vector2, canvas: HTMLCanvasElement) {
+        this.position.x = position.x - (canvas.width / 2);
+        this.position.y = position.y - (canvas.height / 2);
     }
 }

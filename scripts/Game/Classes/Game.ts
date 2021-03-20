@@ -13,9 +13,10 @@ export class Game extends GameBase {
         this.grid = new Grid(64, 64);
 
         this.camera = new Camera();
-        this.camera.position = new Vector2();
-        this.camera.position.x = -100;
-        this.camera.position.y = -50;
+        const gridCenter = new Vector2();
+        gridCenter.x = 64 * ((64 / 2) + 1);
+        gridCenter.y = 64 * ((64 / 2) + 1);
+        this.camera.centerOnPosition(gridCenter, this.canvas);
 
         this.points = new Points();
     }

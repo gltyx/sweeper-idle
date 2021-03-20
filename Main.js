@@ -351,6 +351,7 @@ define("Game/Classes/Camera", ["require", "exports", "Boilerplate/Classes/Vector
     exports.Camera = void 0;
     var Camera = /** @class */ (function () {
         function Camera() {
+            this.position = new Vector2_2.Vector2();
             this.cameraStuck = true;
         }
         Camera.prototype.getWorldToCameraOffset = function (position) {
@@ -374,6 +375,10 @@ define("Game/Classes/Camera", ["require", "exports", "Boilerplate/Classes/Vector
             else {
                 this.cameraStuck = true;
             }
+        };
+        Camera.prototype.centerOnPosition = function (position, canvas) {
+            this.position.x = position.x - (canvas.width / 2);
+            this.position.y = position.y - (canvas.height / 2);
         };
         return Camera;
     }());
@@ -649,9 +654,10 @@ define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Cl
         Game.prototype.initialize = function () {
             this.grid = new Grid_1.Grid(64, 64);
             this.camera = new Camera_1.Camera();
-            this.camera.position = new Vector2_4.Vector2();
-            this.camera.position.x = -100;
-            this.camera.position.y = -50;
+            var gridCenter = new Vector2_4.Vector2();
+            gridCenter.x = 64 * ((64 / 2) + 1);
+            gridCenter.y = 64 * ((64 / 2) + 1);
+            this.camera.centerOnPosition(gridCenter, this.canvas);
             this.points = new Points_1.Points();
         };
         Game.prototype.update = function () {
