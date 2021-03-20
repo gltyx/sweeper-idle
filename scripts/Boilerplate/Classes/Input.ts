@@ -1,6 +1,7 @@
 import { MouseState } from "./MouseState";
 import { MouseButton } from "../Enums/MouseButton";
 import { Vector2 } from "./Vector2";
+import { Scroll } from "../Enums/Scroll";
 
 export class Input {
     private previousMouseState: MouseState;
@@ -15,9 +16,9 @@ export class Input {
     private mouseStickiness = 32; //TODO: tweak this
 
     constructor(canvas: HTMLCanvasElement) {
-        this.previousMouseState = new MouseState(0, 0, false, false);
-        this.currentMouseState = new MouseState(0, 0, false, false);
-        this.runningMouseState = new MouseState(0, 0, false, false);
+        this.previousMouseState = new MouseState(0, 0, false, false, Scroll.None);
+        this.currentMouseState = new MouseState(0, 0, false, false, Scroll.None);
+        this.runningMouseState = new MouseState(0, 0, false, false, Scroll.None);
 
         canvas.addEventListener('mousedown', (event) => {
             if (event.button === MouseButton.Left) {
@@ -25,10 +26,11 @@ export class Input {
                 this.leftDownPosition.x = this.runningMouseState.x;
                 this.leftDownPosition.y = this.runningMouseState.y;
             }
-            else if (event.button === MouseButton.Right)
+            else if (event.button === MouseButton.Right) {
                 this.runningMouseState.right = true;
-            this.rightDownPosition.x = this.runningMouseState.x;
-            this.rightDownPosition.y = this.runningMouseState.y;
+                this.rightDownPosition.x = this.runningMouseState.x;
+                this.rightDownPosition.y = this.runningMouseState.y;
+            }
         });
 
         canvas.addEventListener('mouseup', (event) => {
@@ -50,6 +52,13 @@ export class Input {
         });
 
         canvas.addEventListener('contextmenu', (event) => event.preventDefault());
+
+        canvas.addEventListener('wheel', (event) => {
+            if (event.deltaY < 0)
+                this.runningMouseState.scroll = Scroll.Up;
+            else if (event.deltaY > 0)
+                this.runningMouseState.scroll = Scroll.Down;
+        });
     }
 
     update() {
@@ -58,7 +67,10 @@ export class Input {
             this.runningMouseState.x,
             this.runningMouseState.y,
             this.runningMouseState.left,
-            this.runningMouseState.right);
+            this.runningMouseState.right,
+            this.runningMouseState.scroll);
+
+        this.runningMouseState.scroll = Scroll.None;
     }
 
     getX() {
@@ -107,8 +119,6 @@ export class Input {
     }
 
     getHasLeftDownPositionChanged() {
-
-
         return Math.abs(this.leftDownPosition.x - this.currentMouseState.x) > this.mouseStickiness
             || Math.abs(this.leftDownPosition.y - this.currentMouseState.y) > this.mouseStickiness;
     }
@@ -148,5 +158,9 @@ export class Input {
         if (mouseButton === MouseButton.Right)
             return !this.currentMouseState.right && this.previousMouseState.right;
         return false;
+    }
+
+    getScroll() {
+        return this.currentMouseState.scroll;
     }
 }

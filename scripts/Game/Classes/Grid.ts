@@ -38,8 +38,8 @@ export class Grid {
             mousePos.x = input.getX();
             mousePos.y = input.getY();
             const worldPos = camera.getCameraToWorldOffset(mousePos);
-            const x = Number.parseInt((worldPos.x / 64 - 0.5).toFixed(0));
-            const y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
+            const x = Math.round(worldPos.x / 64 - 0.5);
+            const y = Math.round(worldPos.y / 64 - 0.5);
 
             if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
                 if (this.cellTypes[x][y] === CellTypes.Clear && this.cellStates[x][y] === CellStates.Covered)
@@ -55,8 +55,8 @@ export class Grid {
             mousePos.x = input.getX();
             mousePos.y = input.getY();
             const worldPos = camera.getCameraToWorldOffset(mousePos);
-            const x = Number.parseInt((worldPos.x / 64 - 0.5).toFixed(0));
-            const y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
+            const x = Math.round(worldPos.x / 64 - 0.5);
+            const y = Math.round(worldPos.y / 64 - 0.5);
 
             if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
                 if (this.cellTypes[x][y] === CellTypes.Mine && this.cellStates[x][y] === CellStates.Covered) {
@@ -73,6 +73,7 @@ export class Grid {
     }
 
     draw(context: Context2D, camera: Camera) {
+        const zoom = camera.getZoom();
         const position = new Vector2();
         let offset: Vector2;
 
@@ -83,24 +84,24 @@ export class Grid {
                 offset = camera.getWorldToCameraOffset(position);
 
                 if (this.cellStates[x][y] === CellStates.Covered) {
-                    context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours.boxCoveredColour, Colours.boxBorderColour);
+                    context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours.boxCoveredColour, Colours.boxBorderColour);
                 }
                 else if (this.cellStates[x][y] === CellStates.Uncovered) {
-                    context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours.boxUncoveredColour, Colours.boxBorderColour);
+                    context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours.boxUncoveredColour, Colours.boxBorderColour);
 
                     if (this.cellTypes[x][y] === CellTypes.Mine) {
-                        context.drawFillRectangle(offset.x + 9, offset.y + 9, 46, 46, Colours.boxBombColour);
+                        context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours.boxBombColour);
                     }
                     else if (this.cellTypes[x][y] === CellTypes.Clear) {
                         const cellValue = this.cellValues[x][y];
 
                         if (cellValue !== 0)
-                            context.drawString(cellValue.toString(), offset.x + 32, offset.y + 32, 30, Fonts.Arial, Colours.magenta, Align.Center);
+                            context.drawString(cellValue.toString(), offset.x + 32 * zoom, offset.y + 32 * zoom, 48 * zoom, Fonts.Arial, Colours.magenta, Align.Center);
                     }
                 }
                 else if (this.cellStates[x][y] === CellStates.Flagged) {
-                    context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours.boxCoveredColour, Colours.boxBorderColour);
-                    context.drawFillRectangle(offset.x + 9, offset.y + 9, 46, 46, Colours.boxFlagColour);
+                    context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours.boxCoveredColour, Colours.boxBorderColour);
+                    context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours.boxFlagColour);
                 }
             }
         }

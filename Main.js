@@ -133,16 +133,28 @@ define("Boilerplate/Classes/Context2D", ["require", "exports", "Boilerplate/Enum
         this.drawStrokeRectangle(x, y, w, h, borderColour, lineWidth);
     };
 });
+define("Boilerplate/Enums/Scroll", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Scroll = void 0;
+    var Scroll;
+    (function (Scroll) {
+        Scroll[Scroll["None"] = 1] = "None";
+        Scroll[Scroll["Up"] = 2] = "Up";
+        Scroll[Scroll["Down"] = 3] = "Down";
+    })(Scroll = exports.Scroll || (exports.Scroll = {}));
+});
 define("Boilerplate/Classes/MouseState", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MouseState = void 0;
     var MouseState = /** @class */ (function () {
-        function MouseState(x, y, left, right) {
+        function MouseState(x, y, left, right, scroll) {
             this.x = x;
             this.y = y;
             this.left = left;
             this.right = right;
+            this.scroll = scroll;
         }
         return MouseState;
     }());
@@ -172,7 +184,7 @@ define("Boilerplate/Classes/Vector2", ["require", "exports"], function (require,
     }());
     exports.Vector2 = Vector2;
 });
-define("Boilerplate/Classes/Input", ["require", "exports", "Boilerplate/Classes/MouseState", "Boilerplate/Enums/MouseButton", "Boilerplate/Classes/Vector2"], function (require, exports, MouseState_1, MouseButton_1, Vector2_1) {
+define("Boilerplate/Classes/Input", ["require", "exports", "Boilerplate/Classes/MouseState", "Boilerplate/Enums/MouseButton", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/Scroll"], function (require, exports, MouseState_1, MouseButton_1, Vector2_1, Scroll_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Input = void 0;
@@ -184,19 +196,20 @@ define("Boilerplate/Classes/Input", ["require", "exports", "Boilerplate/Classes/
             this.leftDownPosition = new Vector2_1.Vector2();
             this.rightDownPosition = new Vector2_1.Vector2();
             this.mouseStickiness = 32; //TODO: tweak this
-            this.previousMouseState = new MouseState_1.MouseState(0, 0, false, false);
-            this.currentMouseState = new MouseState_1.MouseState(0, 0, false, false);
-            this.runningMouseState = new MouseState_1.MouseState(0, 0, false, false);
+            this.previousMouseState = new MouseState_1.MouseState(0, 0, false, false, Scroll_1.Scroll.None);
+            this.currentMouseState = new MouseState_1.MouseState(0, 0, false, false, Scroll_1.Scroll.None);
+            this.runningMouseState = new MouseState_1.MouseState(0, 0, false, false, Scroll_1.Scroll.None);
             canvas.addEventListener('mousedown', function (event) {
                 if (event.button === MouseButton_1.MouseButton.Left) {
                     _this.runningMouseState.left = true;
                     _this.leftDownPosition.x = _this.runningMouseState.x;
                     _this.leftDownPosition.y = _this.runningMouseState.y;
                 }
-                else if (event.button === MouseButton_1.MouseButton.Right)
+                else if (event.button === MouseButton_1.MouseButton.Right) {
                     _this.runningMouseState.right = true;
-                _this.rightDownPosition.x = _this.runningMouseState.x;
-                _this.rightDownPosition.y = _this.runningMouseState.y;
+                    _this.rightDownPosition.x = _this.runningMouseState.x;
+                    _this.rightDownPosition.y = _this.runningMouseState.y;
+                }
             });
             canvas.addEventListener('mouseup', function (event) {
                 if (event.button === MouseButton_1.MouseButton.Left) {
@@ -215,10 +228,17 @@ define("Boilerplate/Classes/Input", ["require", "exports", "Boilerplate/Classes/
                 _this.runningMouseState.y = event.clientY - rect.top;
             });
             canvas.addEventListener('contextmenu', function (event) { return event.preventDefault(); });
+            canvas.addEventListener('wheel', function (event) {
+                if (event.deltaY < 0)
+                    _this.runningMouseState.scroll = Scroll_1.Scroll.Up;
+                else if (event.deltaY > 0)
+                    _this.runningMouseState.scroll = Scroll_1.Scroll.Down;
+            });
         }
         Input.prototype.update = function () {
             this.previousMouseState = this.currentMouseState;
-            this.currentMouseState = new MouseState_1.MouseState(this.runningMouseState.x, this.runningMouseState.y, this.runningMouseState.left, this.runningMouseState.right);
+            this.currentMouseState = new MouseState_1.MouseState(this.runningMouseState.x, this.runningMouseState.y, this.runningMouseState.left, this.runningMouseState.right, this.runningMouseState.scroll);
+            this.runningMouseState.scroll = Scroll_1.Scroll.None;
         };
         Input.prototype.getX = function () {
             return this.currentMouseState.x;
@@ -290,6 +310,9 @@ define("Boilerplate/Classes/Input", ["require", "exports", "Boilerplate/Classes/
                 return !this.currentMouseState.right && this.previousMouseState.right;
             return false;
         };
+        Input.prototype.getScroll = function () {
+            return this.currentMouseState.scroll;
+        };
         return Input;
     }());
     exports.Input = Input;
@@ -345,40 +368,68 @@ define("Game/Enums/CellTypes", ["require", "exports"], function (require, export
         CellTypes[CellTypes["Mine"] = 2] = "Mine";
     })(CellTypes = exports.CellTypes || (exports.CellTypes = {}));
 });
-define("Game/Classes/Camera", ["require", "exports", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/MouseButton"], function (require, exports, Vector2_2, MouseButton_2) {
+define("Game/Classes/Camera", ["require", "exports", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/MouseButton", "Boilerplate/Enums/Scroll"], function (require, exports, Vector2_2, MouseButton_2, Scroll_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Camera = void 0;
     var Camera = /** @class */ (function () {
         function Camera() {
             this.position = new Vector2_2.Vector2();
+            this.zoomLevel = 2;
+            this.zoomLevels = [0.5, 0.75, 1, 1.5, 2, 3];
             this.cameraStuck = true;
+            this.updateZoom();
         }
         Camera.prototype.getWorldToCameraOffset = function (position) {
             var offset = new Vector2_2.Vector2();
-            offset.x = position.x - this.position.x;
-            offset.y = position.y - this.position.y;
+            offset.x = (position.x - this.position.x) * this.zoom;
+            offset.y = (position.y - this.position.y) * this.zoom;
             return offset;
         };
         Camera.prototype.getCameraToWorldOffset = function (position) {
             var offset = new Vector2_2.Vector2();
-            offset.x = position.x + this.position.x;
-            offset.y = position.y + this.position.y;
+            offset.x = this.position.x + position.x / this.zoom;
+            offset.y = this.position.y + position.y / this.zoom;
             return offset;
         };
         Camera.prototype.update = function (input) {
             if (input.isDown(MouseButton_2.MouseButton.Left) && (!this.cameraStuck || input.getHasLeftDownPositionChanged())) {
-                this.position.x -= input.getChangeX();
-                this.position.y -= input.getChangeY();
+                this.position.x -= input.getChangeX() / this.zoom;
+                this.position.y -= input.getChangeY() / this.zoom;
                 this.cameraStuck = false;
             }
             else {
                 this.cameraStuck = true;
             }
+            var scroll = input.getScroll();
+            if (scroll === Scroll_2.Scroll.Up) {
+                this.zoomLevel = Math.min(this.zoomLevel + 1, this.zoomLevels.length - 1);
+            }
+            else if (scroll === Scroll_2.Scroll.Down) {
+                this.zoomLevel = Math.max(this.zoomLevel - 1, 0);
+            }
+            if (scroll !== Scroll_2.Scroll.None) {
+                var screenPosition = new Vector2_2.Vector2();
+                screenPosition.x = input.getX();
+                screenPosition.y = input.getY();
+                var worldPosition = this.getCameraToWorldOffset(screenPosition);
+                this.updateZoom();
+                this.alignScreenAndWorld(screenPosition, worldPosition);
+            }
         };
         Camera.prototype.centerOnPosition = function (position, canvas) {
-            this.position.x = position.x - (canvas.width / 2);
-            this.position.y = position.y - (canvas.height / 2);
+            this.position.x = position.x - (canvas.width / 2 / this.zoom);
+            this.position.y = position.y - (canvas.height / 2 / this.zoom);
+        };
+        Camera.prototype.alignScreenAndWorld = function (screenPosition, worldPosition) {
+            this.position.x = -((screenPosition.x / this.zoom) - worldPosition.x);
+            this.position.y = -((screenPosition.y / this.zoom) - worldPosition.y);
+        };
+        Camera.prototype.updateZoom = function () {
+            this.zoom = this.zoomLevels[this.zoomLevel];
+        };
+        Camera.prototype.getZoom = function () {
+            return this.zoom;
         };
         return Camera;
     }());
@@ -449,8 +500,8 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                 mousePos.x = input.getX();
                 mousePos.y = input.getY();
                 var worldPos = camera.getCameraToWorldOffset(mousePos);
-                var x = Number.parseInt((worldPos.x / 64 - 0.5).toFixed(0));
-                var y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
+                var x = Math.round(worldPos.x / 64 - 0.5);
+                var y = Math.round(worldPos.y / 64 - 0.5);
                 if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
                     if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear && this.cellStates[x][y] === CellStates_1.CellStates.Covered)
                         this.revealFromCell(x, y, points);
@@ -465,8 +516,8 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                 mousePos.x = input.getX();
                 mousePos.y = input.getY();
                 var worldPos = camera.getCameraToWorldOffset(mousePos);
-                var x = Number.parseInt((worldPos.x / 64 - 0.5).toFixed(0));
-                var y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
+                var x = Math.round(worldPos.x / 64 - 0.5);
+                var y = Math.round(worldPos.y / 64 - 0.5);
                 if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
                     if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine && this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
                         this.cellStates[x][y] = CellStates_1.CellStates.Flagged;
@@ -481,6 +532,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
             }
         };
         Grid.prototype.draw = function (context, camera) {
+            var zoom = camera.getZoom();
             var position = new Vector2_3.Vector2();
             var offset;
             for (var x = 0; x < this.width; x++) {
@@ -489,22 +541,22 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                     position.y = y * 64;
                     offset = camera.getWorldToCameraOffset(position);
                     if (this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours_2.Colours.boxCoveredColour, Colours_2.Colours.boxBorderColour);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxCoveredColour, Colours_2.Colours.boxBorderColour);
                     }
                     else if (this.cellStates[x][y] === CellStates_1.CellStates.Uncovered) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours_2.Colours.boxUncoveredColour, Colours_2.Colours.boxBorderColour);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxUncoveredColour, Colours_2.Colours.boxBorderColour);
                         if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine) {
-                            context.drawFillRectangle(offset.x + 9, offset.y + 9, 46, 46, Colours_2.Colours.boxBombColour);
+                            context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours_2.Colours.boxBombColour);
                         }
                         else if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear) {
                             var cellValue = this.cellValues[x][y];
                             if (cellValue !== 0)
-                                context.drawString(cellValue.toString(), offset.x + 32, offset.y + 32, 30, Fonts_2.Fonts.Arial, Colours_2.Colours.magenta, Align_3.Align.Center);
+                                context.drawString(cellValue.toString(), offset.x + 32 * zoom, offset.y + 32 * zoom, 48 * zoom, Fonts_2.Fonts.Arial, Colours_2.Colours.magenta, Align_3.Align.Center);
                         }
                     }
                     else if (this.cellStates[x][y] === CellStates_1.CellStates.Flagged) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours_2.Colours.boxCoveredColour, Colours_2.Colours.boxBorderColour);
-                        context.drawFillRectangle(offset.x + 9, offset.y + 9, 46, 46, Colours_2.Colours.boxFlagColour);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxCoveredColour, Colours_2.Colours.boxBorderColour);
+                        context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours_2.Colours.boxFlagColour);
                     }
                 }
             }
