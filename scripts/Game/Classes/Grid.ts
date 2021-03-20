@@ -1,4 +1,3 @@
-import { Colour } from "../../Boilerplate/Classes/Colour";
 import { Context2D } from "../../Boilerplate/Classes/Context2D";
 import { Input } from "../../Boilerplate/Classes/Input";
 import { Vector2 } from "../../Boilerplate/Classes/Vector2";
@@ -43,10 +42,30 @@ export class Grid {
             const y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
 
             if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-                if (this.cellTypes[x][y] === CellTypes.Clear)
+                if (this.cellTypes[x][y] === CellTypes.Clear && this.cellStates[x][y] === CellStates.Covered)
                     this.revealFromCell(x, y, points);
-                else {
+                else if (this.cellTypes[x][y] === CellTypes.Mine && this.cellStates[x][y] === CellStates.Covered) {
                     this.cellStates[x][y] = CellStates.Uncovered;
+                    points.points = 0;
+                }
+            }
+        }
+        else if (input.isReleased(MouseButton.Right) && !input.getRightUsed()) {
+            const mousePos = new Vector2();
+            mousePos.x = input.getX();
+            mousePos.y = input.getY();
+            const worldPos = camera.getCameraToWorldOffset(mousePos);
+            const x = Number.parseInt((worldPos.x / 64 - 0.5).toFixed(0));
+            const y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
+
+            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                if (this.cellTypes[x][y] === CellTypes.Mine && this.cellStates[x][y] === CellStates.Covered) {
+                    this.cellStates[x][y] = CellStates.Flagged;
+                    points.points += 20;
+                }
+                else if (this.cellTypes[x][y] === CellTypes.Clear && this.cellStates[x][y] === CellStates.Covered) {
+                    this.cellStates[x][y] = CellStates.Uncovered;
+                    this.revealFromCell(x, y);
                     points.points = 0;
                 }
             }
@@ -78,6 +97,10 @@ export class Grid {
                         if (cellValue !== 0)
                             context.drawString(cellValue.toString(), offset.x + 32, offset.y + 32, 30, Fonts.Arial, Colours.magenta, Align.Center);
                     }
+                }
+                else if (this.cellStates[x][y] === CellStates.Flagged) {
+                    context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours.boxCoveredColour, Colours.boxBorderColour);
+                    context.drawFillRectangle(offset.x + 9, offset.y + 9, 46, 46, Colours.boxFlagColour);
                 }
             }
         }

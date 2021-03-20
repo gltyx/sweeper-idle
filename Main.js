@@ -396,6 +396,7 @@ define("Game/Classes/Colours", ["require", "exports", "Boilerplate/Classes/Colou
         Colours.boxCoveredColour = new Colour_1.Colour(48, 48, 48);
         Colours.boxUncoveredColour = new Colour_1.Colour(80, 80, 80);
         Colours.boxBombColour = new Colour_1.Colour(240, 80, 80);
+        Colours.boxFlagColour = new Colour_1.Colour(80, 240, 80);
         return Colours;
     }());
     exports.Colours = Colours;
@@ -446,10 +447,29 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                 var x = Number.parseInt((worldPos.x / 64 - 0.5).toFixed(0));
                 var y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
                 if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-                    if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear)
+                    if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear && this.cellStates[x][y] === CellStates_1.CellStates.Covered)
                         this.revealFromCell(x, y, points);
-                    else {
+                    else if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine && this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
                         this.cellStates[x][y] = CellStates_1.CellStates.Uncovered;
+                        points.points = 0;
+                    }
+                }
+            }
+            else if (input.isReleased(MouseButton_3.MouseButton.Right) && !input.getRightUsed()) {
+                var mousePos = new Vector2_3.Vector2();
+                mousePos.x = input.getX();
+                mousePos.y = input.getY();
+                var worldPos = camera.getCameraToWorldOffset(mousePos);
+                var x = Number.parseInt((worldPos.x / 64 - 0.5).toFixed(0));
+                var y = Number.parseInt((worldPos.y / 64 - 0.5).toFixed(0));
+                if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                    if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine && this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
+                        this.cellStates[x][y] = CellStates_1.CellStates.Flagged;
+                        points.points += 20;
+                    }
+                    else if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear && this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
+                        this.cellStates[x][y] = CellStates_1.CellStates.Uncovered;
+                        this.revealFromCell(x, y);
                         points.points = 0;
                     }
                 }
@@ -476,6 +496,10 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                             if (cellValue !== 0)
                                 context.drawString(cellValue.toString(), offset.x + 32, offset.y + 32, 30, Fonts_2.Fonts.Arial, Colours_2.Colours.magenta, Align_3.Align.Center);
                         }
+                    }
+                    else if (this.cellStates[x][y] === CellStates_1.CellStates.Flagged) {
+                        context.drawBorderedRectangle(offset.x, offset.y, 64, 64, Colours_2.Colours.boxCoveredColour, Colours_2.Colours.boxBorderColour);
+                        context.drawFillRectangle(offset.x + 9, offset.y + 9, 46, 46, Colours_2.Colours.boxFlagColour);
                     }
                 }
             }

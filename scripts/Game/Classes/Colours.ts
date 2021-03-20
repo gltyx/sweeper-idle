@@ -12,4 +12,5 @@ export class Colours {
     public static boxCoveredColour: Colour = new Colour(48, 48, 48);
     public static boxUncoveredColour: Colour = new Colour(80, 80, 80);
     public static boxBombColour: Colour = new Colour(240, 80, 80);
+    public static boxFlagColour: Colour = new Colour(80, 240, 80);
 }
