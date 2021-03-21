@@ -84,13 +84,13 @@ export class Grid {
                 offset = camera.getWorldToCameraOffset(position);
 
                 if (this.cellStates[x][y] === CellStates.Covered) {
-                    context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours.boxCoveredColour, Colours.boxBorderColour);
+                    context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours.boxCovered, Colours.boxBorder);
                 }
                 else if (this.cellStates[x][y] === CellStates.Uncovered) {
-                    context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours.boxUncoveredColour, Colours.boxBorderColour);
+                    context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours.boxUncovered, Colours.boxBorder);
 
                     if (this.cellTypes[x][y] === CellTypes.Mine) {
-                        context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours.boxBombColour);
+                        context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours.boxBomb);
                     }
                     else if (this.cellTypes[x][y] === CellTypes.Clear) {
                         const cellValue = this.cellValues[x][y];
@@ -100,8 +100,8 @@ export class Grid {
                     }
                 }
                 else if (this.cellStates[x][y] === CellStates.Flagged) {
-                    context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours.boxCoveredColour, Colours.boxBorderColour);
-                    context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours.boxFlagColour);
+                    context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours.boxCovered, Colours.boxBorder);
+                    context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours.boxFlag);
                 }
             }
         }
@@ -168,6 +168,7 @@ export class Grid {
     revealFromCell(x: number, y: number, points?: Points) {
         const openCells: number[][] = [];
         const closedCells: number[][] = [];
+        let totalPoints = 0;
 
         openCells.push([x, y]);
 
@@ -177,9 +178,7 @@ export class Grid {
 
             this.cellStates[cell[0]][cell[1]] = CellStates.Uncovered;
 
-            if (points) {
-                points.addPoints(this.cellValues[cell[0]][cell[1]] + 1);
-            }
+            totalPoints += this.cellValues[cell[0]][cell[1]] + 1;
 
             if (this.cellValues[cell[0]][cell[1]] === 0) {
                 this.getSurroundingCells(cell[0], cell[1])
@@ -189,6 +188,10 @@ export class Grid {
                         .every(openCell => openCell[0] !== surroundingCell[0] || openCell[1] !== surroundingCell[1]))
                     .forEach(surroundingCell => openCells.push(surroundingCell));
             }
+        }
+
+        if (points) {
+            points.addPoints(totalPoints);
         }
     }
 

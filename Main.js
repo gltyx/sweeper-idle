@@ -455,11 +455,12 @@ define("Game/Classes/Colours", ["require", "exports", "Boilerplate/Classes/Colou
         Colours.cyan = new Colour_1.Colour(0, 255, 255);
         Colours.blue = new Colour_1.Colour(0, 0, 255);
         Colours.magenta = new Colour_1.Colour(255, 0, 255);
-        Colours.boxBorderColour = new Colour_1.Colour(16, 16, 16);
-        Colours.boxCoveredColour = new Colour_1.Colour(48, 48, 48);
-        Colours.boxUncoveredColour = new Colour_1.Colour(80, 80, 80);
-        Colours.boxBombColour = new Colour_1.Colour(240, 80, 80);
-        Colours.boxFlagColour = new Colour_1.Colour(80, 240, 80);
+        Colours.background = new Colour_1.Colour(64, 64, 64);
+        Colours.boxBorder = new Colour_1.Colour(16, 16, 16);
+        Colours.boxCovered = new Colour_1.Colour(48, 48, 48);
+        Colours.boxUncovered = new Colour_1.Colour(80, 80, 80);
+        Colours.boxBomb = new Colour_1.Colour(240, 80, 80);
+        Colours.boxFlag = new Colour_1.Colour(80, 240, 80);
         return Colours;
     }());
     exports.Colours = Colours;
@@ -514,7 +515,7 @@ define("Boilerplate/Classes/GameBase", ["require", "exports", "Boilerplate/Class
     }());
     exports.GameBase = GameBase;
 });
-define("Game/Classes/Points", ["require", "exports", "Boilerplate/Classes/GameBase", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Game/Classes/Colours"], function (require, exports, GameBase_1, Align_2, Fonts_1, Colours_1) {
+define("Game/Classes/Points", ["require", "exports", "Boilerplate/Classes/GameBase", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Classes/Colours"], function (require, exports, GameBase_1, Align_2, Fonts_1, MouseButton_3, Functions_1, Colours_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Points = void 0;
@@ -529,28 +530,40 @@ define("Game/Classes/Points", ["require", "exports", "Boilerplate/Classes/GameBa
             return this.points;
         };
         Points.prototype.addPoints = function (points) {
-            this.points += points;
-            this.particles.push(new PointTextParticle('+' + points, Colours_1.Colours.green, this.particleLife));
+            if (points > 0) {
+                this.points += points;
+                this.particles.push(new PointTextParticle('+' + points, Colours_1.Colours.green, this.particleLife));
+            }
         };
         Points.prototype.subtractPoints = function (points) {
-            this.points -= points;
-            this.particles.push(new PointTextParticle('-' + points, Colours_1.Colours.red, this.particleLife));
+            if (points > 0) {
+                this.points -= points;
+                this.particles.push(new PointTextParticle('-' + points, Colours_1.Colours.red, this.particleLife));
+            }
         };
-        Points.prototype.update = function () {
+        Points.prototype.update = function (context, input) {
             this.particles.forEach(function (x) { return x.life -= GameBase_1.GameBase.updateTime; });
             this.particles = this.particles.filter(function (x) { return x.life > 0; });
+            this.pointsText = "Points: " + this.points;
+            var measurement = context.measureString(this.pointsText, 48, Fonts_1.Fonts.Arial, Align_2.Align.Center);
+            this.rectX = 20;
+            this.rectY = context.canvas.height - 70;
+            this.rectW = measurement.width + 20;
+            this.rectH = 50;
+            if (input.isReleased(MouseButton_3.MouseButton.Left) && !input.getLeftUsed()
+                && Functions_1.pointWithinRectangle(input.getX(), input.getY(), this.rectX, this.rectY, this.rectW, this.rectH)) {
+                input.setLeftUsed();
+            }
+            if (input.isReleased(MouseButton_3.MouseButton.Right) && !input.getRightUsed()
+                && Functions_1.pointWithinRectangle(input.getX(), input.getY(), this.rectX, this.rectY, this.rectW, this.rectH)) {
+                input.setRightUsed();
+            }
         };
         Points.prototype.draw = function (context) {
             var _this = this;
-            var pointsText = "Points: " + this.points;
-            var measurement = context.measureString(pointsText, 48, Fonts_1.Fonts.Arial, Align_2.Align.Center);
-            var rectX = 20;
-            var rectY = context.canvas.height - 80;
-            var rectW = measurement.width + 20;
-            var rectH = 50;
-            context.drawBorderedRectangle(rectX, rectY, rectW, rectH, Colours_1.Colours.boxUncoveredColour, Colours_1.Colours.boxBorderColour);
-            context.drawString(pointsText, rectX + rectW / 2, rectY + rectH / 2 + 4, 48, Fonts_1.Fonts.Arial, Colours_1.Colours.boxBorderColour, Align_2.Align.Center);
-            this.particles.forEach(function (x) { return context.drawString(x.text, rectX + rectW / 2, (rectY + rectH / 2) - (_this.particleLife - x.life) * _this.particleSpeed, 48, Fonts_1.Fonts.Arial, x.colour, Align_2.Align.Center); });
+            context.drawBorderedRectangle(this.rectX, this.rectY, this.rectW, this.rectH, Colours_1.Colours.boxUncovered, Colours_1.Colours.boxBorder);
+            context.drawString(this.pointsText, this.rectX + this.rectW / 2, this.rectY + this.rectH / 2 + 4, 48, Fonts_1.Fonts.Arial, Colours_1.Colours.boxBorder, Align_2.Align.Center);
+            this.particles.forEach(function (x) { return context.drawString(x.text, _this.rectX + _this.rectW / 2, (_this.rectY + _this.rectH / 2) - (_this.particleLife - x.life) * _this.particleSpeed, 48, Fonts_1.Fonts.Arial, x.colour, Align_2.Align.Center); });
         };
         return Points;
     }());
@@ -564,15 +577,15 @@ define("Game/Classes/Points", ["require", "exports", "Boilerplate/Classes/GameBa
         return PointTextParticle;
     }());
 });
-define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Enums/CellStates", "Game/Enums/CellTypes", "Game/Classes/Colours"], function (require, exports, Vector2_3, Align_3, Fonts_2, MouseButton_3, Functions_1, CellStates_1, CellTypes_1, Colours_2) {
+define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Enums/CellStates", "Game/Enums/CellTypes", "Game/Classes/Colours"], function (require, exports, Vector2_3, Align_3, Fonts_2, MouseButton_4, Functions_2, CellStates_1, CellTypes_1, Colours_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Grid = void 0;
     var Grid = /** @class */ (function () {
         function Grid(width, height) {
-            this.cellValues = Functions_1.createMultidimensionalArray(width, height, 0);
-            this.cellTypes = Functions_1.createMultidimensionalArray(width, height, CellTypes_1.CellTypes.Clear);
-            this.cellStates = Functions_1.createMultidimensionalArray(width, height, CellStates_1.CellStates.Covered);
+            this.cellValues = Functions_2.createMultidimensionalArray(width, height, 0);
+            this.cellTypes = Functions_2.createMultidimensionalArray(width, height, CellTypes_1.CellTypes.Clear);
+            this.cellStates = Functions_2.createMultidimensionalArray(width, height, CellStates_1.CellStates.Covered);
             this.width = width;
             this.height = height;
             this.generateMines();
@@ -580,7 +593,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
             this.revealFromCell(this.width / 2, this.height / 2);
         }
         Grid.prototype.update = function (camera, input, points) {
-            if (input.isReleased(MouseButton_3.MouseButton.Left) && !input.getHasLeftDownPositionChanged() && !input.getLeftUsed()) {
+            if (input.isReleased(MouseButton_4.MouseButton.Left) && !input.getHasLeftDownPositionChanged() && !input.getLeftUsed()) {
                 var mousePos = new Vector2_3.Vector2();
                 mousePos.x = input.getX();
                 mousePos.y = input.getY();
@@ -596,7 +609,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                     }
                 }
             }
-            else if (input.isReleased(MouseButton_3.MouseButton.Right) && !input.getRightUsed()) {
+            else if (input.isReleased(MouseButton_4.MouseButton.Right) && !input.getRightUsed()) {
                 var mousePos = new Vector2_3.Vector2();
                 mousePos.x = input.getX();
                 mousePos.y = input.getY();
@@ -626,12 +639,12 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                     position.y = y * 64;
                     offset = camera.getWorldToCameraOffset(position);
                     if (this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxCoveredColour, Colours_2.Colours.boxBorderColour);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxCovered, Colours_2.Colours.boxBorder);
                     }
                     else if (this.cellStates[x][y] === CellStates_1.CellStates.Uncovered) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxUncoveredColour, Colours_2.Colours.boxBorderColour);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxUncovered, Colours_2.Colours.boxBorder);
                         if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine) {
-                            context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours_2.Colours.boxBombColour);
+                            context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours_2.Colours.boxBomb);
                         }
                         else if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear) {
                             var cellValue = this.cellValues[x][y];
@@ -640,8 +653,8 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                         }
                     }
                     else if (this.cellStates[x][y] === CellStates_1.CellStates.Flagged) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxCoveredColour, Colours_2.Colours.boxBorderColour);
-                        context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours_2.Colours.boxFlagColour);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxCovered, Colours_2.Colours.boxBorder);
+                        context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours_2.Colours.boxFlag);
                     }
                 }
             }
@@ -681,8 +694,8 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                 }
             }
             while (minesLeft > 0) {
-                var x = Functions_1.randomInt(0, this.width - 1);
-                var y = Functions_1.randomInt(0, this.height - 1);
+                var x = Functions_2.randomInt(0, this.width - 1);
+                var y = Functions_2.randomInt(0, this.height - 1);
                 if (this.cellTypes[x][y] !== CellTypes_1.CellTypes.Mine) {
                     this.cellTypes[x][y] = CellTypes_1.CellTypes.Mine;
                     minesLeft--;
@@ -697,14 +710,13 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
         Grid.prototype.revealFromCell = function (x, y, points) {
             var openCells = [];
             var closedCells = [];
+            var totalPoints = 0;
             openCells.push([x, y]);
             while (openCells.length > 0) {
                 var cell = openCells.pop();
                 closedCells.push(cell);
                 this.cellStates[cell[0]][cell[1]] = CellStates_1.CellStates.Uncovered;
-                if (points) {
-                    points.addPoints(this.cellValues[cell[0]][cell[1]] + 1);
-                }
+                totalPoints += this.cellValues[cell[0]][cell[1]] + 1;
                 if (this.cellValues[cell[0]][cell[1]] === 0) {
                     this.getSurroundingCells(cell[0], cell[1])
                         .filter(function (surroundingCell) { return closedCells
@@ -713,6 +725,9 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                         .every(function (openCell) { return openCell[0] !== surroundingCell[0] || openCell[1] !== surroundingCell[1]; }); })
                         .forEach(function (surroundingCell) { return openCells.push(surroundingCell); });
                 }
+            }
+            if (points) {
+                points.addPoints(totalPoints);
             }
         };
         Grid.prototype.getSurroundingCells = function (x, y) {
@@ -733,7 +748,129 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
     }());
     exports.Grid = Grid;
 });
-define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Classes/Camera", "Boilerplate/Classes/Vector2", "Boilerplate/Classes/GameBase", "Game/Classes/Points"], function (require, exports, Grid_1, Camera_1, Vector2_4, GameBase_2, Points_1) {
+define("Game/Enums/Upgrades", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Upgrades = void 0;
+    var Upgrades;
+    (function (Upgrades) {
+        Upgrades[Upgrades["CellUncover1"] = 1] = "CellUncover1";
+        Upgrades[Upgrades["CellUncover2"] = 2] = "CellUncover2";
+        Upgrades[Upgrades["CellUncover3"] = 3] = "CellUncover3";
+        Upgrades[Upgrades["CellUncover4"] = 4] = "CellUncover4";
+    })(Upgrades = exports.Upgrades || (exports.Upgrades = {}));
+});
+define("Game/Classes/UpgradeInfo", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.UpgradeInfo = void 0;
+    var UpgradeInfo = /** @class */ (function () {
+        function UpgradeInfo(upgrade, name, description, cost, shortName, colour, requiredUpgrades) {
+            this.upgrade = upgrade;
+            this.name = name;
+            this.description = description;
+            this.cost = cost;
+            this.shortName = shortName;
+            this.colour = colour;
+            this.requiredUpgrades = requiredUpgrades;
+        }
+        return UpgradeInfo;
+    }());
+    exports.UpgradeInfo = UpgradeInfo;
+});
+define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrades", "Game/Classes/Colours", "Game/Classes/UpgradeInfo"], function (require, exports, Upgrades_1, Colours_3, UpgradeInfo_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.UpgradeManager = void 0;
+    var UpgradeManager = /** @class */ (function () {
+        function UpgradeManager() {
+            this.upgradeInfo = [];
+            this.unlockedUpgrades = [];
+        }
+        UpgradeManager.prototype.initialize = function () {
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover1, "Crude Automatic Revealer", "Automatically reveals safe cells around cells with 1 mine nearby.", 100, "RVLR1", Colours_3.Colours.green, []));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover2, "Basic Automatic Revealer", "Automatically reveals safe cells around cells with 2 mines nearby.", 250, "RVLR2", Colours_3.Colours.green, [Upgrades_1.Upgrades.CellUncover1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover3, "Advanced Automatic Revealer", "Automatically reveals safe cells around cells with 3 mines nearby.", 500, "RVLR3", Colours_3.Colours.green, [Upgrades_1.Upgrades.CellUncover2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover3, "Enhanced Automatic Revealer", "Automatically reveals safe cells around cells with 4 mines nearby.", 1000, "RVLR4", Colours_3.Colours.green, [Upgrades_1.Upgrades.CellUncover4]));
+        };
+        UpgradeManager.prototype.getAvailableUpgrades = function () {
+            var _this = this;
+            return this.upgradeInfo.filter(function (x) { return _this.isUpgradeAvailable(x.upgrade); });
+        };
+        UpgradeManager.prototype.isUpgradeAvailable = function (upgrade) {
+            var _this = this;
+            if (this.unlockedUpgrades.some(function (x) { return x === upgrade; }))
+                return false;
+            var info = this.upgradeInfo.filter(function (x) { return x.upgrade === upgrade; })[0];
+            return info.requiredUpgrades.every(function (x) { return _this.unlockedUpgrades.some(function (y) { return y === x; }); });
+        };
+        UpgradeManager.prototype.unlockUpgrade = function (upgrade) {
+            this.unlockedUpgrades.push(upgrade);
+        };
+        return UpgradeManager;
+    }());
+    exports.UpgradeManager = UpgradeManager;
+});
+define("Game/Classes/Shop", ["require", "exports", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Classes/Colours"], function (require, exports, Align_4, Fonts_3, MouseButton_5, Functions_3, Colours_4) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Shop = void 0;
+    var Shop = /** @class */ (function () {
+        function Shop() {
+            this.titleRectX = 20;
+            this.titleRectY = 20;
+            this.titleRectW = 272;
+            this.titleRectH = 60;
+            this.mainRectX = 20;
+            this.mainRectY = 80;
+            this.mainRectW = 272;
+            this.upgradeWidth = 64;
+            this.upgradeHeight = 64;
+            this.upgradeOffset = 20;
+        }
+        Shop.prototype.update = function (input, upgradeManager, points) {
+            var _this = this;
+            var upgrades = upgradeManager.getAvailableUpgrades();
+            if (input.isReleased(MouseButton_5.MouseButton.Left) && !input.getLeftUsed()
+                && Functions_3.pointWithinRectangle(input.getX(), input.getY(), this.titleRectX, this.titleRectY, this.titleRectW, this.titleRectH + this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset))) {
+                input.setLeftUsed();
+                upgrades.forEach(function (x, i) {
+                    if (Functions_3.pointWithinRectangle(input.getX(), input.getY(), _this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3), _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3), _this.upgradeWidth, _this.upgradeHeight)) {
+                        if (points.getPoints() >= x.cost) {
+                            points.subtractPoints(x.cost);
+                            upgradeManager.unlockUpgrade(x.upgrade);
+                        }
+                    }
+                });
+            }
+            if (input.isReleased(MouseButton_5.MouseButton.Right) && !input.getRightUsed()
+                && Functions_3.pointWithinRectangle(input.getX(), input.getY(), this.titleRectX, this.titleRectY, this.titleRectW, this.titleRectH + this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset))) {
+                input.setRightUsed();
+            }
+        };
+        Shop.prototype.draw = function (context, upgradeManager, points, input) {
+            var _this = this;
+            var upgrades = upgradeManager.getAvailableUpgrades();
+            context.drawBorderedRectangle(this.mainRectX, this.mainRectY, this.mainRectW, this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset), Colours_4.Colours.boxUncovered, Colours_4.Colours.boxBorder);
+            context.drawBorderedRectangle(this.titleRectX, this.titleRectY, this.titleRectW, this.titleRectH, Colours_4.Colours.boxUncovered, Colours_4.Colours.boxBorder);
+            context.drawString('Shop', this.titleRectX + this.titleRectW / 2, this.titleRectY + this.titleRectH / 2 + 4, 48, Fonts_3.Fonts.Arial, Colours_4.Colours.boxBorder, Align_4.Align.Center);
+            upgrades.forEach(function (x, i) {
+                var colour;
+                if (points.getPoints() < x.cost)
+                    colour = Colours_4.Colours.boxCovered;
+                else if (Functions_3.pointWithinRectangle(input.getX(), input.getY(), _this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3), _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3), _this.upgradeWidth, _this.upgradeHeight))
+                    colour = Colours_4.Colours.boxUncovered;
+                else
+                    colour = Colours_4.Colours.background;
+                context.drawBorderedRectangle(_this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3), _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3), _this.upgradeWidth, _this.upgradeHeight, colour, Colours_4.Colours.boxBorder);
+                context.drawString(x.shortName, _this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3) + _this.upgradeWidth / 2, _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3) + _this.upgradeHeight / 2, 16, Fonts_3.Fonts.Arial, x.colour, Align_4.Align.Center);
+            });
+        };
+        return Shop;
+    }());
+    exports.Shop = Shop;
+});
+define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Classes/Camera", "Boilerplate/Classes/Vector2", "Boilerplate/Classes/GameBase", "Game/Classes/Points", "Game/Classes/Shop", "Game/Classes/UpgradeManager"], function (require, exports, Grid_1, Camera_1, Vector2_4, GameBase_2, Points_1, Shop_1, UpgradeManager_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Game = void 0;
@@ -750,15 +887,20 @@ define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Cl
             gridCenter.y = 64 * ((64 / 2) + 1);
             this.camera.centerOnPosition(gridCenter, this.canvas);
             this.points = new Points_1.Points();
+            this.shop = new Shop_1.Shop();
+            this.upgradeManager = new UpgradeManager_1.UpgradeManager();
+            this.upgradeManager.initialize();
         };
         Game.prototype.update = function () {
             this.camera.update(this.input);
+            this.shop.update(this.input, this.upgradeManager, this.points);
+            this.points.update(this.context, this.input);
             this.grid.update(this.camera, this.input, this.points);
-            this.points.update();
         };
         Game.prototype.draw = function () {
             this.grid.draw(this.context, this.camera);
             this.points.draw(this.context);
+            this.shop.draw(this.context, this.upgradeManager, this.points, this.input);
         };
         return Game;
     }(GameBase_2.GameBase));
