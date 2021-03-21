@@ -1,0 +1,23 @@
+Upgrade that clears spaces around cells where all the mines are known
+    Could start out only working on cells with 1 but could be upgraded further
+    Could have speed upgrades
+
+Upgrade that plants mines on cells where the mine is obvious eg. a 1 cell with only 1 covered cell
+    Speed upgrades
+    Could start out only looking at 1 cells but upgrade later
+
+Point multipliers
+
+Level completion bonus
+
+Upgrades to reduce penalties for incorrect digging or flagging
+
+Seperate currency based on mines collected
+
+Infinite map?
+
+Things that can be placed down?
+
+Increase map size per completion
+
+

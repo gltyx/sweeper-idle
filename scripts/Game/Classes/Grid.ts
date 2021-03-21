@@ -46,7 +46,7 @@ export class Grid {
                     this.revealFromCell(x, y, points);
                 else if (this.cellTypes[x][y] === CellTypes.Mine && this.cellStates[x][y] === CellStates.Covered) {
                     this.cellStates[x][y] = CellStates.Uncovered;
-                    points.points = 0;
+                    points.subtractPoints(points.getPoints());
                 }
             }
         }
@@ -61,12 +61,12 @@ export class Grid {
             if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
                 if (this.cellTypes[x][y] === CellTypes.Mine && this.cellStates[x][y] === CellStates.Covered) {
                     this.cellStates[x][y] = CellStates.Flagged;
-                    points.points += 20;
+                    points.addPoints(20);
                 }
                 else if (this.cellTypes[x][y] === CellTypes.Clear && this.cellStates[x][y] === CellStates.Covered) {
                     this.cellStates[x][y] = CellStates.Uncovered;
                     this.revealFromCell(x, y);
-                    points.points = 0;
+                    points.subtractPoints(points.getPoints());
                 }
             }
         }
@@ -138,7 +138,7 @@ export class Grid {
     }
 
     generateMines() {
-        const mineAmount = 0.25;
+        const mineAmount = 0.20;
 
         let minesLeft = Math.round(((this.width * this.height) - 16) * mineAmount);
 
@@ -178,7 +178,7 @@ export class Grid {
             this.cellStates[cell[0]][cell[1]] = CellStates.Uncovered;
 
             if (points) {
-                points.points += this.cellValues[cell[0]][cell[1]] + 1;
+                points.addPoints(this.cellValues[cell[0]][cell[1]] + 1);
             }
 
             if (this.cellValues[cell[0]][cell[1]] === 0) {

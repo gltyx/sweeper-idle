@@ -2,13 +2,17 @@ import { Context2D } from "./Context2D";
 import { Input } from "./Input";
 
 export abstract class GameBase {
+    static updatesPerSecond = 60;
+    static drawsPerSecond = 60;
+    static updateInterval = 1000 / 60;
+    static drawInterval = 1000 / 60;
+    static updateTime = 1 / 60;
+    static drawTime = 1 / 60;
+
     canvas: HTMLCanvasElement;
     context: Context2D;
 
     input: Input;
-
-    updateInterval = 1000 / 60;
-    drawInterval = 1000 / 60;
 
     windowWidth: number;
     windowHeight: number;
@@ -47,11 +51,11 @@ export abstract class GameBase {
     }
 
     private startUpdating() {
-        setInterval(() => this.baseUpdate(), this.updateInterval);
+        setInterval(() => this.baseUpdate(), GameBase.updateInterval);
     }
 
     private startDrawing() {
-        setInterval(() => this.baseDraw(), this.drawInterval);
+        setInterval(() => this.baseDraw(), GameBase.drawInterval);
     }
 
     private updateWindowSize() {

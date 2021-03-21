@@ -464,27 +464,105 @@ define("Game/Classes/Colours", ["require", "exports", "Boilerplate/Classes/Colou
     }());
     exports.Colours = Colours;
 });
-define("Game/Classes/Points", ["require", "exports", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Game/Classes/Colours"], function (require, exports, Align_2, Fonts_1, Colours_1) {
+define("Boilerplate/Classes/GameBase", ["require", "exports", "Boilerplate/Classes/Input"], function (require, exports, Input_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.GameBase = void 0;
+    var GameBase = /** @class */ (function () {
+        function GameBase() {
+            var _this = this;
+            this.canvas = document.getElementById('gameCanvas');
+            this.context = this.canvas.getContext2D();
+            this.input = new Input_1.Input(this.canvas);
+            this.updateWindowSize();
+            window.addEventListener('resize', function () { return _this.updateWindowSize(); });
+        }
+        GameBase.prototype.run = function () {
+            this.initialize();
+            this.startUpdating();
+            this.startDrawing();
+        };
+        GameBase.prototype.baseUpdate = function () {
+            this.input.update();
+            this.update();
+        };
+        GameBase.prototype.baseDraw = function () {
+            this.context.clearRect(0, 0, this.windowWidth, this.windowHeight);
+            this.draw();
+        };
+        GameBase.prototype.startUpdating = function () {
+            var _this = this;
+            setInterval(function () { return _this.baseUpdate(); }, GameBase.updateInterval);
+        };
+        GameBase.prototype.startDrawing = function () {
+            var _this = this;
+            setInterval(function () { return _this.baseDraw(); }, GameBase.drawInterval);
+        };
+        GameBase.prototype.updateWindowSize = function () {
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.windowHeight = window.innerHeight;
+        };
+        GameBase.updatesPerSecond = 60;
+        GameBase.drawsPerSecond = 60;
+        GameBase.updateInterval = 1000 / 60;
+        GameBase.drawInterval = 1000 / 60;
+        GameBase.updateTime = 1 / 60;
+        GameBase.drawTime = 1 / 60;
+        return GameBase;
+    }());
+    exports.GameBase = GameBase;
+});
+define("Game/Classes/Points", ["require", "exports", "Boilerplate/Classes/GameBase", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Game/Classes/Colours"], function (require, exports, GameBase_1, Align_2, Fonts_1, Colours_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Points = void 0;
     var Points = /** @class */ (function () {
         function Points() {
             this.points = 0;
+            this.particles = [];
+            this.particleLife = 2;
+            this.particleSpeed = 75;
         }
+        Points.prototype.getPoints = function () {
+            return this.points;
+        };
+        Points.prototype.addPoints = function (points) {
+            this.points += points;
+            this.particles.push(new PointTextParticle('+' + points, Colours_1.Colours.green, this.particleLife));
+        };
+        Points.prototype.subtractPoints = function (points) {
+            this.points -= points;
+            this.particles.push(new PointTextParticle('-' + points, Colours_1.Colours.red, this.particleLife));
+        };
+        Points.prototype.update = function () {
+            this.particles.forEach(function (x) { return x.life -= GameBase_1.GameBase.updateTime; });
+            this.particles = this.particles.filter(function (x) { return x.life > 0; });
+        };
         Points.prototype.draw = function (context) {
+            var _this = this;
             var pointsText = "Points: " + this.points;
-            var measurement = context.measureString(pointsText, 30, Fonts_1.Fonts.Arial, Align_2.Align.Center);
+            var measurement = context.measureString(pointsText, 48, Fonts_1.Fonts.Arial, Align_2.Align.Center);
             var rectX = 20;
-            var rectY = context.canvas.height - 70;
+            var rectY = context.canvas.height - 80;
             var rectW = measurement.width + 20;
             var rectH = 50;
-            context.drawBorderedRectangle(20, context.canvas.height - (20 + 50), measurement.width + 20, 50, Colours_1.Colours.boxUncoveredColour, Colours_1.Colours.boxBorderColour);
-            context.drawString(pointsText, rectX + rectW / 2, rectY + rectH / 2, 30, Fonts_1.Fonts.Arial, Colours_1.Colours.boxBorderColour, Align_2.Align.Center);
+            context.drawBorderedRectangle(rectX, rectY, rectW, rectH, Colours_1.Colours.boxUncoveredColour, Colours_1.Colours.boxBorderColour);
+            context.drawString(pointsText, rectX + rectW / 2, rectY + rectH / 2 + 4, 48, Fonts_1.Fonts.Arial, Colours_1.Colours.boxBorderColour, Align_2.Align.Center);
+            this.particles.forEach(function (x) { return context.drawString(x.text, rectX + rectW / 2, (rectY + rectH / 2) - (_this.particleLife - x.life) * _this.particleSpeed, 48, Fonts_1.Fonts.Arial, x.colour, Align_2.Align.Center); });
         };
         return Points;
     }());
     exports.Points = Points;
+    var PointTextParticle = /** @class */ (function () {
+        function PointTextParticle(text, colour, life) {
+            this.text = text;
+            this.colour = colour;
+            this.life = life;
+        }
+        return PointTextParticle;
+    }());
 });
 define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Enums/CellStates", "Game/Enums/CellTypes", "Game/Classes/Colours"], function (require, exports, Vector2_3, Align_3, Fonts_2, MouseButton_3, Functions_1, CellStates_1, CellTypes_1, Colours_2) {
     "use strict";
@@ -514,7 +592,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                         this.revealFromCell(x, y, points);
                     else if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine && this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
                         this.cellStates[x][y] = CellStates_1.CellStates.Uncovered;
-                        points.points = 0;
+                        points.subtractPoints(points.getPoints());
                     }
                 }
             }
@@ -528,12 +606,12 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                 if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
                     if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine && this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
                         this.cellStates[x][y] = CellStates_1.CellStates.Flagged;
-                        points.points += 20;
+                        points.addPoints(20);
                     }
                     else if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear && this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
                         this.cellStates[x][y] = CellStates_1.CellStates.Uncovered;
                         this.revealFromCell(x, y);
-                        points.points = 0;
+                        points.subtractPoints(points.getPoints());
                     }
                 }
             }
@@ -595,7 +673,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
             return this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine;
         };
         Grid.prototype.generateMines = function () {
-            var mineAmount = 0.25;
+            var mineAmount = 0.20;
             var minesLeft = Math.round(((this.width * this.height) - 16) * mineAmount);
             for (var x = this.width / 2 - 2; x < this.width / 2 + 2; x++) {
                 for (var y = this.height / 2 - 2; y < this.height / 2 + 2; y++) {
@@ -625,7 +703,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                 closedCells.push(cell);
                 this.cellStates[cell[0]][cell[1]] = CellStates_1.CellStates.Uncovered;
                 if (points) {
-                    points.points += this.cellValues[cell[0]][cell[1]] + 1;
+                    points.addPoints(this.cellValues[cell[0]][cell[1]] + 1);
                 }
                 if (this.cellValues[cell[0]][cell[1]] === 0) {
                     this.getSurroundingCells(cell[0], cell[1])
@@ -655,53 +733,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
     }());
     exports.Grid = Grid;
 });
-define("Boilerplate/Classes/GameBase", ["require", "exports", "Boilerplate/Classes/Input"], function (require, exports, Input_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.GameBase = void 0;
-    var GameBase = /** @class */ (function () {
-        function GameBase() {
-            var _this = this;
-            this.updateInterval = 1000 / 60;
-            this.drawInterval = 1000 / 60;
-            this.canvas = document.getElementById('gameCanvas');
-            this.context = this.canvas.getContext2D();
-            this.input = new Input_1.Input(this.canvas);
-            this.updateWindowSize();
-            window.addEventListener('resize', function () { return _this.updateWindowSize(); });
-        }
-        GameBase.prototype.run = function () {
-            this.initialize();
-            this.startUpdating();
-            this.startDrawing();
-        };
-        GameBase.prototype.baseUpdate = function () {
-            this.input.update();
-            this.update();
-        };
-        GameBase.prototype.baseDraw = function () {
-            this.context.clearRect(0, 0, this.windowWidth, this.windowHeight);
-            this.draw();
-        };
-        GameBase.prototype.startUpdating = function () {
-            var _this = this;
-            setInterval(function () { return _this.baseUpdate(); }, this.updateInterval);
-        };
-        GameBase.prototype.startDrawing = function () {
-            var _this = this;
-            setInterval(function () { return _this.baseDraw(); }, this.drawInterval);
-        };
-        GameBase.prototype.updateWindowSize = function () {
-            this.canvas.width = window.innerWidth;
-            this.canvas.height = window.innerHeight;
-            this.windowWidth = window.innerWidth;
-            this.windowHeight = window.innerHeight;
-        };
-        return GameBase;
-    }());
-    exports.GameBase = GameBase;
-});
-define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Classes/Camera", "Boilerplate/Classes/Vector2", "Boilerplate/Classes/GameBase", "Game/Classes/Points"], function (require, exports, Grid_1, Camera_1, Vector2_4, GameBase_1, Points_1) {
+define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Classes/Camera", "Boilerplate/Classes/Vector2", "Boilerplate/Classes/GameBase", "Game/Classes/Points"], function (require, exports, Grid_1, Camera_1, Vector2_4, GameBase_2, Points_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Game = void 0;
@@ -722,13 +754,14 @@ define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Cl
         Game.prototype.update = function () {
             this.camera.update(this.input);
             this.grid.update(this.camera, this.input, this.points);
+            this.points.update();
         };
         Game.prototype.draw = function () {
             this.grid.draw(this.context, this.camera);
             this.points.draw(this.context);
         };
         return Game;
-    }(GameBase_1.GameBase));
+    }(GameBase_2.GameBase));
     exports.Game = Game;
 });
 define("Main", ["require", "exports", "Game/Classes/Game", "Boilerplate/Classes/Context2D"], function (require, exports, Game_1) {
