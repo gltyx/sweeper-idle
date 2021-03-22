@@ -1,56 +1,49 @@
-//class Tooltip {
-//    constructor(
-//        public title: string,
-//        public text: string,
-//        public x: number,
-//        public y: number,
-//        public cost: number = null,
-//    ) { }
+import { Context2D } from "../../Boilerplate/Classes/Context2D";
+import { Align } from "../../Boilerplate/Enums/Align";
+import { Fonts } from "../../Boilerplate/Enums/Fonts";
+import { Colours } from "./Colours";
+import { Points } from "./Points";
 
-//    draw(context: Context) {
-//        const height = this.getHeight();
-//        const top = this.getTop();
+export class Tooltip {
+    private hasTooltip = false;
+    private title: string;
+    private text: string;
+    private x: number;
+    private y: number;
+    private cost: number;
+    private costPrefix = "Cost: ";
 
-//        const width = this.getWidth(context);
+    update() {
+        this.hasTooltip = false;
+        this.cost = null;
+    }
 
-//        context.drawRect(this.x, top, width, height, game.colours.background, true);
-//        context.drawRect(this.x, top, width, height, game.colours.boxNormal, false);
+    draw(context: Context2D, points: Points) {
+        if (this.hasTooltip) {
+            let titleWidth = context.measureString(this.title, 30, Fonts.Arial, Align.Left).width;
+            const textWidth = context.measureString(this.text, 24, Fonts.Arial, Align.Left).width;
 
-//        context.drawString(this.title, this.x + 5, top + 30, 30, game.fonts.default, game.colours.textNormal, Align.Default);
-//        context.drawString(this.text, this.x + 5, top + 55, 22, game.fonts.default, game.colours.textNormal, Align.Default);
+            if (this.cost != null)
+                titleWidth += context.measureString(this.costPrefix + this.cost, 24, Fonts.Arial, Align.Right).width;
 
-//        if (this.cost != null) {
-//            context.drawString(this.getCostPrefix(), this.x + 5, top + 80, 22, game.fonts.default, game.colours.textNormal, Align.Default);
-//            context.drawString(this.cost.toString(), this.x + 5 + this.getCostPrefixWidth(context), top + 80, 22,
-//                game.fonts.default, this.cost <= game.points.points ? game.colours.textGood : game.colours.textBad, Align.Default);
-//        }
-//    }
+            const width = Math.max(titleWidth, textWidth) + 20;
 
-//    getHeight() {
-//        return this.cost == null ? 60 : 90;
-//    }
+            context.drawBorderedRectangle(this.x, this.y, width, 80, Colours.background, Colours.boxBorder);
+            context.drawString(this.title, this.x + 10, this.y + 10, 30, Fonts.Arial, Colours.boxBorder, Align.TopLeft);
+            context.drawString(this.text, this.x + 10, this.y + 50, 24, Fonts.Arial, Colours.boxBorder, Align.TopLeft);
 
-//    getTop() {
-//        return this.y - this.getHeight();
-//    }
+            if (this.cost != null)
+                context.drawString(this.costPrefix + this.cost, (this.x + width) - 10, this.y + 10, 24, Fonts.Arial,
+                    points.getPoints() < this.cost ? Colours.red : Colours.green, Align.TopRight);
+        }
+    }
 
-//    getCostPrefix() {
-//        return 'Cost: ';
-//    }
-
-//    getCostPrefixWidth(context: Context) {
-//        return context.measureText(this.getCostPrefix()).width;
-//    }
-
-//    getWidth(context: Context) {
-//        const titleWidth = context.measureString(this.title, 30, game.fonts.default).width;
-//        const textWidth = context.measureString(this.text, 22, game.fonts.default).width;
-
-//        if (this.cost == null) {
-//            return Math.max(titleWidth, textWidth) + 10;
-//        }
-
-//        const costWidth = context.measureString(this.getCostPrefix() + this.cost.toString(), 22, game.fonts.default).width;
-//        return Math.max(titleWidth, textWidth, costWidth) + 10;
-//    }
-//}
+    setTooltip(title: string, text: string, x: number, y: number, cost: number = null) {
+        this.hasTooltip = true;
+        this.title = title;
+        this.text = text;
+        this.x = x;
+        this.y = y;
+        this.cost = cost;
+    }
+}

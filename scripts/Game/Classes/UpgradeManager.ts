@@ -32,13 +32,13 @@ export class UpgradeManager {
             Colours.green,
             [Upgrades.CellUncover2]));
         this.upgradeInfo.push(new UpgradeInfo(
-            Upgrades.CellUncover3,
+            Upgrades.CellUncover4,
             "Enhanced Automatic Revealer",
             "Automatically reveals safe cells around cells with 4 mines nearby.",
             1000,
             "RVLR4",
             Colours.green,
-            [Upgrades.CellUncover4]));
+            [Upgrades.CellUncover3]));
     }
 
     public getAvailableUpgrades() {

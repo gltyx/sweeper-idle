@@ -7,6 +7,7 @@ import { MouseButton } from "../../Boilerplate/Enums/MouseButton";
 import { pointWithinRectangle } from "../../Boilerplate/Functions";
 import { Colours } from "./Colours";
 import { Points } from "./Points";
+import { Tooltip } from "./Tooltip";
 import { UpgradeManager } from "./UpgradeManager";
 
 export class Shop {
@@ -22,30 +23,39 @@ export class Shop {
     private upgradeHeight = 64;
     private upgradeOffset = 20;
 
-    update(input: Input, upgradeManager: UpgradeManager, points: Points) {
+    update(input: Input, upgradeManager: UpgradeManager, points: Points, tooltip: Tooltip) {
         const upgrades = upgradeManager.getAvailableUpgrades();
 
-        if (input.isReleased(MouseButton.Left) && !input.getLeftUsed()
-            && pointWithinRectangle(input.getX(), input.getY(), this.titleRectX, this.titleRectY, this.titleRectW,
-                this.titleRectH + this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset))) {
-            input.setLeftUsed();
+        if (pointWithinRectangle(input.getX(), input.getY(), this.titleRectX, this.titleRectY, this.titleRectW,
+            this.titleRectH + this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset))) {
+            if (input.isReleased(MouseButton.Left) && !input.getLeftUsed()) {
+                input.setLeftUsed();
+
+                upgrades.forEach((x, i) => {
+                    if (pointWithinRectangle(input.getX(), input.getY(),
+                        this.mainRectX + this.upgradeOffset + (this.upgradeOffset + this.upgradeWidth) * (i % 3),
+                        this.mainRectY + this.upgradeOffset + (this.upgradeOffset + this.upgradeHeight) * ((i - i % 3) / 3),
+                        this.upgradeWidth, this.upgradeHeight)) {
+                        if (points.getPoints() >= x.cost) {
+                            points.subtractPoints(x.cost);
+                            upgradeManager.unlockUpgrade(x.upgrade)
+                        }
+                    }
+                });
+            }
+
+            if (input.isReleased(MouseButton.Right) && !input.getRightUsed()) {
+                input.setRightUsed();
+            }
 
             upgrades.forEach((x, i) => {
                 if (pointWithinRectangle(input.getX(), input.getY(),
                     this.mainRectX + this.upgradeOffset + (this.upgradeOffset + this.upgradeWidth) * (i % 3),
                     this.mainRectY + this.upgradeOffset + (this.upgradeOffset + this.upgradeHeight) * ((i - i % 3) / 3),
                     this.upgradeWidth, this.upgradeHeight)) {
-                    if (points.getPoints() >= x.cost) {
-                        points.subtractPoints(x.cost);
-                        upgradeManager.unlockUpgrade(x.upgrade)
-                    }
+                    tooltip.setTooltip(x.name, x.description, input.getX(), input.getY(), x.cost);
                 }
             });
-        }
-        if (input.isReleased(MouseButton.Right) && !input.getRightUsed()
-            && pointWithinRectangle(input.getX(), input.getY(), this.titleRectX, this.titleRectY, this.titleRectW,
-                this.titleRectH + this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset))) {
-            input.setRightUsed();
         }
     }
 

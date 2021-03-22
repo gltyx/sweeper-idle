@@ -5,6 +5,7 @@ import { GameBase } from "../../Boilerplate/Classes/GameBase";
 import { Points } from "./Points";
 import { Shop } from "./Shop";
 import { UpgradeManager } from "./UpgradeManager";
+import { Tooltip } from "./Tooltip";
 
 export class Game extends GameBase {
     grid: Grid;
@@ -12,6 +13,7 @@ export class Game extends GameBase {
     points: Points;
     shop: Shop;
     upgradeManager: UpgradeManager;
+    tooltip: Tooltip;
 
     initialize() {
         this.grid = new Grid(64, 64);
@@ -28,11 +30,14 @@ export class Game extends GameBase {
 
         this.upgradeManager = new UpgradeManager();
         this.upgradeManager.initialize();
+
+        this.tooltip = new Tooltip();
     }
 
     update() {
+        this.tooltip.update();
         this.camera.update(this.input);
-        this.shop.update(this.input, this.upgradeManager, this.points);
+        this.shop.update(this.input, this.upgradeManager, this.points, this.tooltip);
         this.points.update(this.context, this.input);
         this.grid.update(this.camera, this.input, this.points);
     }
@@ -41,5 +46,6 @@ export class Game extends GameBase {
         this.grid.draw(this.context, this.camera);
         this.points.draw(this.context);
         this.shop.draw(this.context, this.upgradeManager, this.points, this.input);
+        this.tooltip.draw(this.context, this.points);
     }
 }

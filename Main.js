@@ -748,6 +748,46 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
     }());
     exports.Grid = Grid;
 });
+define("Game/Classes/Tooltip", ["require", "exports", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Game/Classes/Colours"], function (require, exports, Align_4, Fonts_3, Colours_3) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Tooltip = void 0;
+    var Tooltip = /** @class */ (function () {
+        function Tooltip() {
+            this.hasTooltip = false;
+            this.costPrefix = "Cost: ";
+        }
+        Tooltip.prototype.update = function () {
+            this.hasTooltip = false;
+            this.cost = null;
+        };
+        Tooltip.prototype.draw = function (context, points) {
+            if (this.hasTooltip) {
+                var titleWidth = context.measureString(this.title, 30, Fonts_3.Fonts.Arial, Align_4.Align.Left).width;
+                var textWidth = context.measureString(this.text, 24, Fonts_3.Fonts.Arial, Align_4.Align.Left).width;
+                if (this.cost != null)
+                    titleWidth += context.measureString(this.costPrefix + this.cost, 24, Fonts_3.Fonts.Arial, Align_4.Align.Right).width;
+                var width = Math.max(titleWidth, textWidth) + 20;
+                context.drawBorderedRectangle(this.x, this.y, width, 80, Colours_3.Colours.background, Colours_3.Colours.boxBorder);
+                context.drawString(this.title, this.x + 10, this.y + 10, 30, Fonts_3.Fonts.Arial, Colours_3.Colours.boxBorder, Align_4.Align.TopLeft);
+                context.drawString(this.text, this.x + 10, this.y + 50, 24, Fonts_3.Fonts.Arial, Colours_3.Colours.boxBorder, Align_4.Align.TopLeft);
+                if (this.cost != null)
+                    context.drawString(this.costPrefix + this.cost, (this.x + width) - 10, this.y + 10, 24, Fonts_3.Fonts.Arial, points.getPoints() < this.cost ? Colours_3.Colours.red : Colours_3.Colours.green, Align_4.Align.TopRight);
+            }
+        };
+        Tooltip.prototype.setTooltip = function (title, text, x, y, cost) {
+            if (cost === void 0) { cost = null; }
+            this.hasTooltip = true;
+            this.title = title;
+            this.text = text;
+            this.x = x;
+            this.y = y;
+            this.cost = cost;
+        };
+        return Tooltip;
+    }());
+    exports.Tooltip = Tooltip;
+});
 define("Game/Enums/Upgrades", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -778,7 +818,7 @@ define("Game/Classes/UpgradeInfo", ["require", "exports"], function (require, ex
     }());
     exports.UpgradeInfo = UpgradeInfo;
 });
-define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrades", "Game/Classes/Colours", "Game/Classes/UpgradeInfo"], function (require, exports, Upgrades_1, Colours_3, UpgradeInfo_1) {
+define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrades", "Game/Classes/Colours", "Game/Classes/UpgradeInfo"], function (require, exports, Upgrades_1, Colours_4, UpgradeInfo_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.UpgradeManager = void 0;
@@ -788,10 +828,10 @@ define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrade
             this.unlockedUpgrades = [];
         }
         UpgradeManager.prototype.initialize = function () {
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover1, "Crude Automatic Revealer", "Automatically reveals safe cells around cells with 1 mine nearby.", 100, "RVLR1", Colours_3.Colours.green, []));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover2, "Basic Automatic Revealer", "Automatically reveals safe cells around cells with 2 mines nearby.", 250, "RVLR2", Colours_3.Colours.green, [Upgrades_1.Upgrades.CellUncover1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover3, "Advanced Automatic Revealer", "Automatically reveals safe cells around cells with 3 mines nearby.", 500, "RVLR3", Colours_3.Colours.green, [Upgrades_1.Upgrades.CellUncover2]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover3, "Enhanced Automatic Revealer", "Automatically reveals safe cells around cells with 4 mines nearby.", 1000, "RVLR4", Colours_3.Colours.green, [Upgrades_1.Upgrades.CellUncover4]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover1, "Crude Automatic Revealer", "Automatically reveals safe cells around cells with 1 mine nearby.", 100, "RVLR1", Colours_4.Colours.green, []));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover2, "Basic Automatic Revealer", "Automatically reveals safe cells around cells with 2 mines nearby.", 250, "RVLR2", Colours_4.Colours.green, [Upgrades_1.Upgrades.CellUncover1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover3, "Advanced Automatic Revealer", "Automatically reveals safe cells around cells with 3 mines nearby.", 500, "RVLR3", Colours_4.Colours.green, [Upgrades_1.Upgrades.CellUncover2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover4, "Enhanced Automatic Revealer", "Automatically reveals safe cells around cells with 4 mines nearby.", 1000, "RVLR4", Colours_4.Colours.green, [Upgrades_1.Upgrades.CellUncover3]));
         };
         UpgradeManager.prototype.getAvailableUpgrades = function () {
             var _this = this;
@@ -811,7 +851,7 @@ define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrade
     }());
     exports.UpgradeManager = UpgradeManager;
 });
-define("Game/Classes/Shop", ["require", "exports", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Classes/Colours"], function (require, exports, Align_4, Fonts_3, MouseButton_5, Functions_3, Colours_4) {
+define("Game/Classes/Shop", ["require", "exports", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Classes/Colours"], function (require, exports, Align_5, Fonts_4, MouseButton_5, Functions_3, Colours_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Shop = void 0;
@@ -828,49 +868,54 @@ define("Game/Classes/Shop", ["require", "exports", "Boilerplate/Enums/Align", "B
             this.upgradeHeight = 64;
             this.upgradeOffset = 20;
         }
-        Shop.prototype.update = function (input, upgradeManager, points) {
+        Shop.prototype.update = function (input, upgradeManager, points, tooltip) {
             var _this = this;
             var upgrades = upgradeManager.getAvailableUpgrades();
-            if (input.isReleased(MouseButton_5.MouseButton.Left) && !input.getLeftUsed()
-                && Functions_3.pointWithinRectangle(input.getX(), input.getY(), this.titleRectX, this.titleRectY, this.titleRectW, this.titleRectH + this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset))) {
-                input.setLeftUsed();
+            if (Functions_3.pointWithinRectangle(input.getX(), input.getY(), this.titleRectX, this.titleRectY, this.titleRectW, this.titleRectH + this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset))) {
+                if (input.isReleased(MouseButton_5.MouseButton.Left) && !input.getLeftUsed()) {
+                    input.setLeftUsed();
+                    upgrades.forEach(function (x, i) {
+                        if (Functions_3.pointWithinRectangle(input.getX(), input.getY(), _this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3), _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3), _this.upgradeWidth, _this.upgradeHeight)) {
+                            if (points.getPoints() >= x.cost) {
+                                points.subtractPoints(x.cost);
+                                upgradeManager.unlockUpgrade(x.upgrade);
+                            }
+                        }
+                    });
+                }
+                if (input.isReleased(MouseButton_5.MouseButton.Right) && !input.getRightUsed()) {
+                    input.setRightUsed();
+                }
                 upgrades.forEach(function (x, i) {
                     if (Functions_3.pointWithinRectangle(input.getX(), input.getY(), _this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3), _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3), _this.upgradeWidth, _this.upgradeHeight)) {
-                        if (points.getPoints() >= x.cost) {
-                            points.subtractPoints(x.cost);
-                            upgradeManager.unlockUpgrade(x.upgrade);
-                        }
+                        tooltip.setTooltip(x.name, x.description, input.getX(), input.getY(), x.cost);
                     }
                 });
-            }
-            if (input.isReleased(MouseButton_5.MouseButton.Right) && !input.getRightUsed()
-                && Functions_3.pointWithinRectangle(input.getX(), input.getY(), this.titleRectX, this.titleRectY, this.titleRectW, this.titleRectH + this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset))) {
-                input.setRightUsed();
             }
         };
         Shop.prototype.draw = function (context, upgradeManager, points, input) {
             var _this = this;
             var upgrades = upgradeManager.getAvailableUpgrades();
-            context.drawBorderedRectangle(this.mainRectX, this.mainRectY, this.mainRectW, this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset), Colours_4.Colours.boxUncovered, Colours_4.Colours.boxBorder);
-            context.drawBorderedRectangle(this.titleRectX, this.titleRectY, this.titleRectW, this.titleRectH, Colours_4.Colours.boxUncovered, Colours_4.Colours.boxBorder);
-            context.drawString('Shop', this.titleRectX + this.titleRectW / 2, this.titleRectY + this.titleRectH / 2 + 4, 48, Fonts_3.Fonts.Arial, Colours_4.Colours.boxBorder, Align_4.Align.Center);
+            context.drawBorderedRectangle(this.mainRectX, this.mainRectY, this.mainRectW, this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset), Colours_5.Colours.boxUncovered, Colours_5.Colours.boxBorder);
+            context.drawBorderedRectangle(this.titleRectX, this.titleRectY, this.titleRectW, this.titleRectH, Colours_5.Colours.boxUncovered, Colours_5.Colours.boxBorder);
+            context.drawString('Shop', this.titleRectX + this.titleRectW / 2, this.titleRectY + this.titleRectH / 2 + 4, 48, Fonts_4.Fonts.Arial, Colours_5.Colours.boxBorder, Align_5.Align.Center);
             upgrades.forEach(function (x, i) {
                 var colour;
                 if (points.getPoints() < x.cost)
-                    colour = Colours_4.Colours.boxCovered;
+                    colour = Colours_5.Colours.boxCovered;
                 else if (Functions_3.pointWithinRectangle(input.getX(), input.getY(), _this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3), _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3), _this.upgradeWidth, _this.upgradeHeight))
-                    colour = Colours_4.Colours.boxUncovered;
+                    colour = Colours_5.Colours.boxUncovered;
                 else
-                    colour = Colours_4.Colours.background;
-                context.drawBorderedRectangle(_this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3), _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3), _this.upgradeWidth, _this.upgradeHeight, colour, Colours_4.Colours.boxBorder);
-                context.drawString(x.shortName, _this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3) + _this.upgradeWidth / 2, _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3) + _this.upgradeHeight / 2, 16, Fonts_3.Fonts.Arial, x.colour, Align_4.Align.Center);
+                    colour = Colours_5.Colours.background;
+                context.drawBorderedRectangle(_this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3), _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3), _this.upgradeWidth, _this.upgradeHeight, colour, Colours_5.Colours.boxBorder);
+                context.drawString(x.shortName, _this.mainRectX + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeWidth) * (i % 3) + _this.upgradeWidth / 2, _this.mainRectY + _this.upgradeOffset + (_this.upgradeOffset + _this.upgradeHeight) * ((i - i % 3) / 3) + _this.upgradeHeight / 2, 16, Fonts_4.Fonts.Arial, x.colour, Align_5.Align.Center);
             });
         };
         return Shop;
     }());
     exports.Shop = Shop;
 });
-define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Classes/Camera", "Boilerplate/Classes/Vector2", "Boilerplate/Classes/GameBase", "Game/Classes/Points", "Game/Classes/Shop", "Game/Classes/UpgradeManager"], function (require, exports, Grid_1, Camera_1, Vector2_4, GameBase_2, Points_1, Shop_1, UpgradeManager_1) {
+define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Classes/Camera", "Boilerplate/Classes/Vector2", "Boilerplate/Classes/GameBase", "Game/Classes/Points", "Game/Classes/Shop", "Game/Classes/UpgradeManager", "Game/Classes/Tooltip"], function (require, exports, Grid_1, Camera_1, Vector2_4, GameBase_2, Points_1, Shop_1, UpgradeManager_1, Tooltip_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Game = void 0;
@@ -890,10 +935,12 @@ define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Cl
             this.shop = new Shop_1.Shop();
             this.upgradeManager = new UpgradeManager_1.UpgradeManager();
             this.upgradeManager.initialize();
+            this.tooltip = new Tooltip_1.Tooltip();
         };
         Game.prototype.update = function () {
+            this.tooltip.update();
             this.camera.update(this.input);
-            this.shop.update(this.input, this.upgradeManager, this.points);
+            this.shop.update(this.input, this.upgradeManager, this.points, this.tooltip);
             this.points.update(this.context, this.input);
             this.grid.update(this.camera, this.input, this.points);
         };
@@ -901,6 +948,7 @@ define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Cl
             this.grid.draw(this.context, this.camera);
             this.points.draw(this.context);
             this.shop.draw(this.context, this.upgradeManager, this.points, this.input);
+            this.tooltip.draw(this.context, this.points);
         };
         return Game;
     }(GameBase_2.GameBase));
@@ -927,48 +975,4 @@ function setupImages() {
     }
 }
 var images = {};
-//class Tooltip {
-//    constructor(
-//        public title: string,
-//        public text: string,
-//        public x: number,
-//        public y: number,
-//        public cost: number = null,
-//    ) { }
-//    draw(context: Context) {
-//        const height = this.getHeight();
-//        const top = this.getTop();
-//        const width = this.getWidth(context);
-//        context.drawRect(this.x, top, width, height, game.colours.background, true);
-//        context.drawRect(this.x, top, width, height, game.colours.boxNormal, false);
-//        context.drawString(this.title, this.x + 5, top + 30, 30, game.fonts.default, game.colours.textNormal, Align.Default);
-//        context.drawString(this.text, this.x + 5, top + 55, 22, game.fonts.default, game.colours.textNormal, Align.Default);
-//        if (this.cost != null) {
-//            context.drawString(this.getCostPrefix(), this.x + 5, top + 80, 22, game.fonts.default, game.colours.textNormal, Align.Default);
-//            context.drawString(this.cost.toString(), this.x + 5 + this.getCostPrefixWidth(context), top + 80, 22,
-//                game.fonts.default, this.cost <= game.points.points ? game.colours.textGood : game.colours.textBad, Align.Default);
-//        }
-//    }
-//    getHeight() {
-//        return this.cost == null ? 60 : 90;
-//    }
-//    getTop() {
-//        return this.y - this.getHeight();
-//    }
-//    getCostPrefix() {
-//        return 'Cost: ';
-//    }
-//    getCostPrefixWidth(context: Context) {
-//        return context.measureText(this.getCostPrefix()).width;
-//    }
-//    getWidth(context: Context) {
-//        const titleWidth = context.measureString(this.title, 30, game.fonts.default).width;
-//        const textWidth = context.measureString(this.text, 22, game.fonts.default).width;
-//        if (this.cost == null) {
-//            return Math.max(titleWidth, textWidth) + 10;
-//        }
-//        const costWidth = context.measureString(this.getCostPrefix() + this.cost.toString(), 22, game.fonts.default).width;
-//        return Math.max(titleWidth, textWidth, costWidth) + 10;
-//    }
-//}
 //# sourceMappingURL=Main.js.map
