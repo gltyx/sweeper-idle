@@ -57,4 +57,8 @@ export class UpgradeManager {
     public unlockUpgrade(upgrade: Upgrades) {
         this.unlockedUpgrades.push(upgrade);
     }
+
+    public isUpgradeUnlocked(upgrade: Upgrades) {
+        return this.unlockedUpgrades.some(x => x === upgrade);
+    }
 }

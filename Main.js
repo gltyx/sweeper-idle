@@ -324,6 +324,56 @@ define("Boilerplate/Classes/Input", ["require", "exports", "Boilerplate/Classes/
     }());
     exports.Input = Input;
 });
+define("Boilerplate/Classes/GameBase", ["require", "exports", "Boilerplate/Classes/Input"], function (require, exports, Input_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.GameBase = void 0;
+    var GameBase = /** @class */ (function () {
+        function GameBase() {
+            var _this = this;
+            this.canvas = document.getElementById('gameCanvas');
+            this.context = this.canvas.getContext2D();
+            this.input = new Input_1.Input(this.canvas);
+            this.updateWindowSize();
+            window.addEventListener('resize', function () { return _this.updateWindowSize(); });
+        }
+        GameBase.prototype.run = function () {
+            this.initialize();
+            this.startUpdating();
+            this.startDrawing();
+        };
+        GameBase.prototype.baseUpdate = function () {
+            this.input.update();
+            this.update();
+        };
+        GameBase.prototype.baseDraw = function () {
+            this.context.clearRect(0, 0, this.windowWidth, this.windowHeight);
+            this.draw();
+        };
+        GameBase.prototype.startUpdating = function () {
+            var _this = this;
+            setInterval(function () { return _this.baseUpdate(); }, GameBase.updateInterval);
+        };
+        GameBase.prototype.startDrawing = function () {
+            var _this = this;
+            setInterval(function () { return _this.baseDraw(); }, GameBase.drawInterval);
+        };
+        GameBase.prototype.updateWindowSize = function () {
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.windowHeight = window.innerHeight;
+        };
+        GameBase.updatesPerSecond = 60;
+        GameBase.drawsPerSecond = 60;
+        GameBase.updateInterval = 1000 / 60;
+        GameBase.drawInterval = 1000 / 60;
+        GameBase.updateTime = 1 / 60;
+        GameBase.drawTime = 1 / 60;
+        return GameBase;
+    }());
+    exports.GameBase = GameBase;
+});
 define("Boilerplate/Functions", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -374,6 +424,18 @@ define("Game/Enums/CellTypes", ["require", "exports"], function (require, export
         CellTypes[CellTypes["Clear"] = 1] = "Clear";
         CellTypes[CellTypes["Mine"] = 2] = "Mine";
     })(CellTypes = exports.CellTypes || (exports.CellTypes = {}));
+});
+define("Game/Enums/Upgrades", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Upgrades = void 0;
+    var Upgrades;
+    (function (Upgrades) {
+        Upgrades[Upgrades["CellUncover1"] = 1] = "CellUncover1";
+        Upgrades[Upgrades["CellUncover2"] = 2] = "CellUncover2";
+        Upgrades[Upgrades["CellUncover3"] = 3] = "CellUncover3";
+        Upgrades[Upgrades["CellUncover4"] = 4] = "CellUncover4";
+    })(Upgrades = exports.Upgrades || (exports.Upgrades = {}));
 });
 define("Game/Classes/Camera", ["require", "exports", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/MouseButton", "Boilerplate/Enums/Scroll"], function (require, exports, Vector2_2, MouseButton_2, Scroll_2) {
     "use strict";
@@ -465,56 +527,6 @@ define("Game/Classes/Colours", ["require", "exports", "Boilerplate/Classes/Colou
     }());
     exports.Colours = Colours;
 });
-define("Boilerplate/Classes/GameBase", ["require", "exports", "Boilerplate/Classes/Input"], function (require, exports, Input_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.GameBase = void 0;
-    var GameBase = /** @class */ (function () {
-        function GameBase() {
-            var _this = this;
-            this.canvas = document.getElementById('gameCanvas');
-            this.context = this.canvas.getContext2D();
-            this.input = new Input_1.Input(this.canvas);
-            this.updateWindowSize();
-            window.addEventListener('resize', function () { return _this.updateWindowSize(); });
-        }
-        GameBase.prototype.run = function () {
-            this.initialize();
-            this.startUpdating();
-            this.startDrawing();
-        };
-        GameBase.prototype.baseUpdate = function () {
-            this.input.update();
-            this.update();
-        };
-        GameBase.prototype.baseDraw = function () {
-            this.context.clearRect(0, 0, this.windowWidth, this.windowHeight);
-            this.draw();
-        };
-        GameBase.prototype.startUpdating = function () {
-            var _this = this;
-            setInterval(function () { return _this.baseUpdate(); }, GameBase.updateInterval);
-        };
-        GameBase.prototype.startDrawing = function () {
-            var _this = this;
-            setInterval(function () { return _this.baseDraw(); }, GameBase.drawInterval);
-        };
-        GameBase.prototype.updateWindowSize = function () {
-            this.canvas.width = window.innerWidth;
-            this.canvas.height = window.innerHeight;
-            this.windowWidth = window.innerWidth;
-            this.windowHeight = window.innerHeight;
-        };
-        GameBase.updatesPerSecond = 60;
-        GameBase.drawsPerSecond = 60;
-        GameBase.updateInterval = 1000 / 60;
-        GameBase.drawInterval = 1000 / 60;
-        GameBase.updateTime = 1 / 60;
-        GameBase.drawTime = 1 / 60;
-        return GameBase;
-    }());
-    exports.GameBase = GameBase;
-});
 define("Game/Classes/Points", ["require", "exports", "Boilerplate/Classes/GameBase", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Classes/Colours"], function (require, exports, GameBase_1, Align_2, Fonts_1, MouseButton_3, Functions_1, Colours_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -577,12 +589,70 @@ define("Game/Classes/Points", ["require", "exports", "Boilerplate/Classes/GameBa
         return PointTextParticle;
     }());
 });
-define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Enums/CellStates", "Game/Enums/CellTypes", "Game/Classes/Colours"], function (require, exports, Vector2_3, Align_3, Fonts_2, MouseButton_4, Functions_2, CellStates_1, CellTypes_1, Colours_2) {
+define("Game/Classes/UpgradeInfo", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.UpgradeInfo = void 0;
+    var UpgradeInfo = /** @class */ (function () {
+        function UpgradeInfo(upgrade, name, description, cost, shortName, colour, requiredUpgrades) {
+            this.upgrade = upgrade;
+            this.name = name;
+            this.description = description;
+            this.cost = cost;
+            this.shortName = shortName;
+            this.colour = colour;
+            this.requiredUpgrades = requiredUpgrades;
+        }
+        return UpgradeInfo;
+    }());
+    exports.UpgradeInfo = UpgradeInfo;
+});
+define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrades", "Game/Classes/Colours", "Game/Classes/UpgradeInfo"], function (require, exports, Upgrades_1, Colours_2, UpgradeInfo_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.UpgradeManager = void 0;
+    var UpgradeManager = /** @class */ (function () {
+        function UpgradeManager() {
+            this.upgradeInfo = [];
+            this.unlockedUpgrades = [];
+        }
+        UpgradeManager.prototype.initialize = function () {
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover1, "Crude Automatic Revealer", "Automatically reveals safe cells around cells with 1 mine nearby.", 100, "RVLR1", Colours_2.Colours.green, []));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover2, "Basic Automatic Revealer", "Automatically reveals safe cells around cells with 2 mines nearby.", 250, "RVLR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.CellUncover1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover3, "Advanced Automatic Revealer", "Automatically reveals safe cells around cells with 3 mines nearby.", 500, "RVLR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.CellUncover2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover4, "Enhanced Automatic Revealer", "Automatically reveals safe cells around cells with 4 mines nearby.", 1000, "RVLR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.CellUncover3]));
+        };
+        UpgradeManager.prototype.getAvailableUpgrades = function () {
+            var _this = this;
+            return this.upgradeInfo.filter(function (x) { return _this.isUpgradeAvailable(x.upgrade); });
+        };
+        UpgradeManager.prototype.isUpgradeAvailable = function (upgrade) {
+            var _this = this;
+            if (this.unlockedUpgrades.some(function (x) { return x === upgrade; }))
+                return false;
+            var info = this.upgradeInfo.filter(function (x) { return x.upgrade === upgrade; })[0];
+            return info.requiredUpgrades.every(function (x) { return _this.unlockedUpgrades.some(function (y) { return y === x; }); });
+        };
+        UpgradeManager.prototype.unlockUpgrade = function (upgrade) {
+            this.unlockedUpgrades.push(upgrade);
+        };
+        UpgradeManager.prototype.isUpgradeUnlocked = function (upgrade) {
+            return this.unlockedUpgrades.some(function (x) { return x === upgrade; });
+        };
+        return UpgradeManager;
+    }());
+    exports.UpgradeManager = UpgradeManager;
+});
+define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/GameBase", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Enums/CellStates", "Game/Enums/CellTypes", "Game/Enums/Upgrades", "Game/Classes/Colours"], function (require, exports, GameBase_2, Vector2_3, Align_3, Fonts_2, MouseButton_4, Functions_2, CellStates_1, CellTypes_1, Upgrades_2, Colours_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Grid = void 0;
     var Grid = /** @class */ (function () {
         function Grid(width, height) {
+            this.cellUncover1Timer = 0;
+            this.cellUncover2Timer = 0;
+            this.cellUncover3Timer = 0;
+            this.cellUncover4Timer = 0;
             this.cellValues = Functions_2.createMultidimensionalArray(width, height, 0);
             this.cellTypes = Functions_2.createMultidimensionalArray(width, height, CellTypes_1.CellTypes.Clear);
             this.cellStates = Functions_2.createMultidimensionalArray(width, height, CellStates_1.CellStates.Covered);
@@ -592,7 +662,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
             this.calculateCellValues();
             this.revealFromCell(this.width / 2, this.height / 2);
         }
-        Grid.prototype.update = function (camera, input, points) {
+        Grid.prototype.update = function (camera, input, points, upgradeManager) {
             if (input.isReleased(MouseButton_4.MouseButton.Left) && !input.getHasLeftDownPositionChanged() && !input.getLeftUsed()) {
                 var mousePos = new Vector2_3.Vector2();
                 mousePos.x = input.getX();
@@ -628,6 +698,35 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                     }
                 }
             }
+            //TODO: refactor this thing so that multiple upgrades can be run more efficiently
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.CellUncover1)) {
+                if (this.cellUncover1Timer <= 0) {
+                    this.cellUncover1Timer += 1;
+                    this.runRevealerUpgrade(1, points);
+                }
+                this.cellUncover1Timer -= GameBase_2.GameBase.updateTime;
+            }
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.CellUncover2)) {
+                if (this.cellUncover2Timer <= 0) {
+                    this.cellUncover2Timer += 1;
+                    this.runRevealerUpgrade(2, points);
+                }
+                this.cellUncover2Timer -= GameBase_2.GameBase.updateTime;
+            }
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.CellUncover3)) {
+                if (this.cellUncover3Timer <= 0) {
+                    this.cellUncover3Timer += 1;
+                    this.runRevealerUpgrade(3, points);
+                }
+                this.cellUncover3Timer -= GameBase_2.GameBase.updateTime;
+            }
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.CellUncover4)) {
+                if (this.cellUncover4Timer <= 0) {
+                    this.cellUncover4Timer += 1;
+                    this.runRevealerUpgrade(4, points);
+                }
+                this.cellUncover4Timer -= GameBase_2.GameBase.updateTime;
+            }
         };
         Grid.prototype.draw = function (context, camera) {
             var zoom = camera.getZoom();
@@ -639,22 +738,22 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
                     position.y = y * 64;
                     offset = camera.getWorldToCameraOffset(position);
                     if (this.cellStates[x][y] === CellStates_1.CellStates.Covered) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxCovered, Colours_2.Colours.boxBorder);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_3.Colours.boxCovered, Colours_3.Colours.boxBorder);
                     }
                     else if (this.cellStates[x][y] === CellStates_1.CellStates.Uncovered) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxUncovered, Colours_2.Colours.boxBorder);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_3.Colours.boxUncovered, Colours_3.Colours.boxBorder);
                         if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Mine) {
-                            context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours_2.Colours.boxBomb);
+                            context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours_3.Colours.boxBomb);
                         }
                         else if (this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear) {
                             var cellValue = this.cellValues[x][y];
                             if (cellValue !== 0)
-                                context.drawString(cellValue.toString(), offset.x + 32 * zoom, offset.y + 32 * zoom, 48 * zoom, Fonts_2.Fonts.Arial, Colours_2.Colours.magenta, Align_3.Align.Center);
+                                context.drawString(cellValue.toString(), offset.x + 32 * zoom, offset.y + 32 * zoom, 48 * zoom, Fonts_2.Fonts.Arial, Colours_3.Colours.magenta, Align_3.Align.Center);
                         }
                     }
                     else if (this.cellStates[x][y] === CellStates_1.CellStates.Flagged) {
-                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_2.Colours.boxCovered, Colours_2.Colours.boxBorder);
-                        context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours_2.Colours.boxFlag);
+                        context.drawBorderedRectangle(offset.x, offset.y, 64 * zoom, 64 * zoom, Colours_3.Colours.boxCovered, Colours_3.Colours.boxBorder);
+                        context.drawFillRectangle(offset.x + 9 * zoom, offset.y + 9 * zoom, 46 * zoom, 46 * zoom, Colours_3.Colours.boxFlag);
                     }
                 }
             }
@@ -744,11 +843,40 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/Vector2"
             ];
             return cells.filter(function (cell) { return cell[0] >= 0 && cell[0] < _this.width && cell[1] >= 0 && cell[1] < _this.height; });
         };
+        Grid.prototype.runRevealerUpgrade = function (cellValue, points) {
+            var _this = this;
+            //Get all cells that are 1, not a mine, and uncovered (a visible 1 basically)
+            var uncovered = [];
+            for (var x = 0; x < this.width; x++) {
+                for (var y = 0; y < this.height; y++) {
+                    if (this.cellValues[x][y] === cellValue &&
+                        this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear &&
+                        this.cellStates[x][y] === CellStates_1.CellStates.Uncovered) {
+                        uncovered.push([x, y]);
+                    }
+                }
+            }
+            //Filter to cells that have 1 surrounding exploded or flagged mine
+            var safe = uncovered.filter(function (c1) { return _this.getSurroundingCells(c1[0], c1[1])
+                .filter(function (c2) { return _this.cellTypes[c2[0]][c2[1]] === CellTypes_1.CellTypes.Mine &&
+                (_this.cellStates[c2[0]][c2[1]] === CellStates_1.CellStates.Flagged ||
+                    _this.cellStates[c2[0]][c2[1]] === CellStates_1.CellStates.Uncovered); }).length === cellValue; });
+            //Get the cells around the safe 1's that are covered
+            var covered = safe.map(function (c1) { return _this.getSurroundingCells(c1[0], c1[1])
+                .filter(function (c2) { return _this.cellTypes[c2[0]][c2[1]] === CellTypes_1.CellTypes.Clear &&
+                _this.cellStates[c2[0]][c2[1]] === CellStates_1.CellStates.Covered; }); })
+                .reduce(function (a, b) { return a.concat(b); });
+            //Pick one at random and reveal it (might need filtering to unique cells)
+            if (covered.length > 0) {
+                var random = covered[Functions_2.randomInt(0, covered.length - 1)];
+                this.revealFromCell(random[0], random[1], points);
+            }
+        };
         return Grid;
     }());
     exports.Grid = Grid;
 });
-define("Game/Classes/Tooltip", ["require", "exports", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Game/Classes/Colours"], function (require, exports, Align_4, Fonts_3, Colours_3) {
+define("Game/Classes/Tooltip", ["require", "exports", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Game/Classes/Colours"], function (require, exports, Align_4, Fonts_3, Colours_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Tooltip = void 0;
@@ -768,11 +896,11 @@ define("Game/Classes/Tooltip", ["require", "exports", "Boilerplate/Enums/Align",
                 if (this.cost != null)
                     titleWidth += context.measureString(this.costPrefix + this.cost, 24, Fonts_3.Fonts.Arial, Align_4.Align.Right).width;
                 var width = Math.max(titleWidth, textWidth) + 20;
-                context.drawBorderedRectangle(this.x, this.y, width, 80, Colours_3.Colours.background, Colours_3.Colours.boxBorder);
-                context.drawString(this.title, this.x + 10, this.y + 10, 30, Fonts_3.Fonts.Arial, Colours_3.Colours.boxBorder, Align_4.Align.TopLeft);
-                context.drawString(this.text, this.x + 10, this.y + 50, 24, Fonts_3.Fonts.Arial, Colours_3.Colours.boxBorder, Align_4.Align.TopLeft);
+                context.drawBorderedRectangle(this.x, this.y, width, 80, Colours_4.Colours.background, Colours_4.Colours.boxBorder);
+                context.drawString(this.title, this.x + 10, this.y + 10, 30, Fonts_3.Fonts.Arial, Colours_4.Colours.boxBorder, Align_4.Align.TopLeft);
+                context.drawString(this.text, this.x + 10, this.y + 50, 24, Fonts_3.Fonts.Arial, Colours_4.Colours.boxBorder, Align_4.Align.TopLeft);
                 if (this.cost != null)
-                    context.drawString(this.costPrefix + this.cost, (this.x + width) - 10, this.y + 10, 24, Fonts_3.Fonts.Arial, points.getPoints() < this.cost ? Colours_3.Colours.red : Colours_3.Colours.green, Align_4.Align.TopRight);
+                    context.drawString(this.costPrefix + this.cost, (this.x + width) - 10, this.y + 10, 24, Fonts_3.Fonts.Arial, points.getPoints() < this.cost ? Colours_4.Colours.red : Colours_4.Colours.green, Align_4.Align.TopRight);
             }
         };
         Tooltip.prototype.setTooltip = function (title, text, x, y, cost) {
@@ -787,69 +915,6 @@ define("Game/Classes/Tooltip", ["require", "exports", "Boilerplate/Enums/Align",
         return Tooltip;
     }());
     exports.Tooltip = Tooltip;
-});
-define("Game/Enums/Upgrades", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Upgrades = void 0;
-    var Upgrades;
-    (function (Upgrades) {
-        Upgrades[Upgrades["CellUncover1"] = 1] = "CellUncover1";
-        Upgrades[Upgrades["CellUncover2"] = 2] = "CellUncover2";
-        Upgrades[Upgrades["CellUncover3"] = 3] = "CellUncover3";
-        Upgrades[Upgrades["CellUncover4"] = 4] = "CellUncover4";
-    })(Upgrades = exports.Upgrades || (exports.Upgrades = {}));
-});
-define("Game/Classes/UpgradeInfo", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.UpgradeInfo = void 0;
-    var UpgradeInfo = /** @class */ (function () {
-        function UpgradeInfo(upgrade, name, description, cost, shortName, colour, requiredUpgrades) {
-            this.upgrade = upgrade;
-            this.name = name;
-            this.description = description;
-            this.cost = cost;
-            this.shortName = shortName;
-            this.colour = colour;
-            this.requiredUpgrades = requiredUpgrades;
-        }
-        return UpgradeInfo;
-    }());
-    exports.UpgradeInfo = UpgradeInfo;
-});
-define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrades", "Game/Classes/Colours", "Game/Classes/UpgradeInfo"], function (require, exports, Upgrades_1, Colours_4, UpgradeInfo_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.UpgradeManager = void 0;
-    var UpgradeManager = /** @class */ (function () {
-        function UpgradeManager() {
-            this.upgradeInfo = [];
-            this.unlockedUpgrades = [];
-        }
-        UpgradeManager.prototype.initialize = function () {
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover1, "Crude Automatic Revealer", "Automatically reveals safe cells around cells with 1 mine nearby.", 100, "RVLR1", Colours_4.Colours.green, []));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover2, "Basic Automatic Revealer", "Automatically reveals safe cells around cells with 2 mines nearby.", 250, "RVLR2", Colours_4.Colours.green, [Upgrades_1.Upgrades.CellUncover1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover3, "Advanced Automatic Revealer", "Automatically reveals safe cells around cells with 3 mines nearby.", 500, "RVLR3", Colours_4.Colours.green, [Upgrades_1.Upgrades.CellUncover2]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover4, "Enhanced Automatic Revealer", "Automatically reveals safe cells around cells with 4 mines nearby.", 1000, "RVLR4", Colours_4.Colours.green, [Upgrades_1.Upgrades.CellUncover3]));
-        };
-        UpgradeManager.prototype.getAvailableUpgrades = function () {
-            var _this = this;
-            return this.upgradeInfo.filter(function (x) { return _this.isUpgradeAvailable(x.upgrade); });
-        };
-        UpgradeManager.prototype.isUpgradeAvailable = function (upgrade) {
-            var _this = this;
-            if (this.unlockedUpgrades.some(function (x) { return x === upgrade; }))
-                return false;
-            var info = this.upgradeInfo.filter(function (x) { return x.upgrade === upgrade; })[0];
-            return info.requiredUpgrades.every(function (x) { return _this.unlockedUpgrades.some(function (y) { return y === x; }); });
-        };
-        UpgradeManager.prototype.unlockUpgrade = function (upgrade) {
-            this.unlockedUpgrades.push(upgrade);
-        };
-        return UpgradeManager;
-    }());
-    exports.UpgradeManager = UpgradeManager;
 });
 define("Game/Classes/Shop", ["require", "exports", "Boilerplate/Enums/Align", "Boilerplate/Enums/Fonts", "Boilerplate/Enums/MouseButton", "Boilerplate/Functions", "Game/Classes/Colours"], function (require, exports, Align_5, Fonts_4, MouseButton_5, Functions_3, Colours_5) {
     "use strict";
@@ -915,7 +980,7 @@ define("Game/Classes/Shop", ["require", "exports", "Boilerplate/Enums/Align", "B
     }());
     exports.Shop = Shop;
 });
-define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Classes/Camera", "Boilerplate/Classes/Vector2", "Boilerplate/Classes/GameBase", "Game/Classes/Points", "Game/Classes/Shop", "Game/Classes/UpgradeManager", "Game/Classes/Tooltip"], function (require, exports, Grid_1, Camera_1, Vector2_4, GameBase_2, Points_1, Shop_1, UpgradeManager_1, Tooltip_1) {
+define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Classes/Camera", "Boilerplate/Classes/Vector2", "Boilerplate/Classes/GameBase", "Game/Classes/Points", "Game/Classes/Shop", "Game/Classes/UpgradeManager", "Game/Classes/Tooltip"], function (require, exports, Grid_1, Camera_1, Vector2_4, GameBase_3, Points_1, Shop_1, UpgradeManager_1, Tooltip_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Game = void 0;
@@ -942,7 +1007,7 @@ define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Cl
             this.camera.update(this.input);
             this.shop.update(this.input, this.upgradeManager, this.points, this.tooltip);
             this.points.update(this.context, this.input);
-            this.grid.update(this.camera, this.input, this.points);
+            this.grid.update(this.camera, this.input, this.points, this.upgradeManager);
         };
         Game.prototype.draw = function () {
             this.grid.draw(this.context, this.camera);
@@ -951,7 +1016,7 @@ define("Game/Classes/Game", ["require", "exports", "Game/Classes/Grid", "Game/Cl
             this.tooltip.draw(this.context, this.points);
         };
         return Game;
-    }(GameBase_2.GameBase));
+    }(GameBase_3.GameBase));
     exports.Game = Game;
 });
 define("Main", ["require", "exports", "Game/Classes/Game", "Boilerplate/Classes/Context2D"], function (require, exports, Game_1) {

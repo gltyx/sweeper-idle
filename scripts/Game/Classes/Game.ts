@@ -39,7 +39,7 @@ export class Game extends GameBase {
         this.camera.update(this.input);
         this.shop.update(this.input, this.upgradeManager, this.points, this.tooltip);
         this.points.update(this.context, this.input);
-        this.grid.update(this.camera, this.input, this.points);
+        this.grid.update(this.camera, this.input, this.points, this.upgradeManager);
     }
 
     draw() {

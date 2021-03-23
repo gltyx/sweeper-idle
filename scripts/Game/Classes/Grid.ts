@@ -1,4 +1,5 @@
 import { Context2D } from "../../Boilerplate/Classes/Context2D";
+import { GameBase } from "../../Boilerplate/Classes/GameBase";
 import { Input } from "../../Boilerplate/Classes/Input";
 import { Vector2 } from "../../Boilerplate/Classes/Vector2";
 import { Align } from "../../Boilerplate/Enums/Align";
@@ -7,9 +8,11 @@ import { MouseButton } from "../../Boilerplate/Enums/MouseButton";
 import { createMultidimensionalArray, randomInt } from "../../Boilerplate/Functions";
 import { CellStates } from "../Enums/CellStates";
 import { CellTypes } from "../Enums/CellTypes";
+import { Upgrades } from "../Enums/Upgrades";
 import { Camera } from "./Camera";
 import { Colours } from "./Colours";
 import { Points } from "./Points";
+import { UpgradeManager } from "./UpgradeManager";
 
 export class Grid {
     private cellValues: number[][];
@@ -17,6 +20,11 @@ export class Grid {
     private cellStates: CellStates[][];
     private width: number;
     private height: number;
+
+    private cellUncover1Timer = 0;
+    private cellUncover2Timer = 0;
+    private cellUncover3Timer = 0;
+    private cellUncover4Timer = 0;
 
     constructor(width: number, height: number) {
         this.cellValues = createMultidimensionalArray(width, height, 0);
@@ -32,7 +40,7 @@ export class Grid {
         this.revealFromCell(this.width / 2, this.height / 2)
     }
 
-    update(camera: Camera, input: Input, points: Points) {
+    update(camera: Camera, input: Input, points: Points, upgradeManager: UpgradeManager) {
         if (input.isReleased(MouseButton.Left) && !input.getHasLeftDownPositionChanged() && !input.getLeftUsed()) {
             const mousePos = new Vector2();
             mousePos.x = input.getX();
@@ -69,6 +77,44 @@ export class Grid {
                     points.subtractPoints(points.getPoints());
                 }
             }
+        }
+
+        //TODO: refactor this thing so that multiple upgrades can be run more efficiently
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.CellUncover1)) {
+            if (this.cellUncover1Timer <= 0) {
+                this.cellUncover1Timer += 1;
+
+                this.runRevealerUpgrade(1, points);
+            }
+
+            this.cellUncover1Timer -= GameBase.updateTime;
+        }
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.CellUncover2)) {
+            if (this.cellUncover2Timer <= 0) {
+                this.cellUncover2Timer += 1;
+
+                this.runRevealerUpgrade(2, points);
+            }
+
+            this.cellUncover2Timer -= GameBase.updateTime;
+        }
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.CellUncover3)) {
+            if (this.cellUncover3Timer <= 0) {
+                this.cellUncover3Timer += 1;
+
+                this.runRevealerUpgrade(3, points);
+            }
+
+            this.cellUncover3Timer -= GameBase.updateTime;
+        }
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.CellUncover4)) {
+            if (this.cellUncover4Timer <= 0) {
+                this.cellUncover4Timer += 1;
+
+                this.runRevealerUpgrade(4, points);
+            }
+
+            this.cellUncover4Timer -= GameBase.updateTime;
         }
     }
 
@@ -208,5 +254,38 @@ export class Grid {
         ];
 
         return cells.filter(cell => cell[0] >= 0 && cell[0] < this.width && cell[1] >= 0 && cell[1] < this.height);
+    }
+
+    runRevealerUpgrade(cellValue: number, points: Points) {
+        //Get all cells that are 1, not a mine, and uncovered (a visible 1 basically)
+        const uncovered: number[][] = [];
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                if (this.cellValues[x][y] === cellValue &&
+                    this.cellTypes[x][y] === CellTypes.Clear &&
+                    this.cellStates[x][y] === CellStates.Uncovered) {
+                    uncovered.push([x, y]);
+                }
+            }
+        }
+
+        //Filter to cells that have 1 surrounding exploded or flagged mine
+        const safe = uncovered.filter(c1 => this.getSurroundingCells(c1[0], c1[1])
+            .filter(c2 => this.cellTypes[c2[0]][c2[1]] === CellTypes.Mine &&
+                (this.cellStates[c2[0]][c2[1]] === CellStates.Flagged ||
+                    this.cellStates[c2[0]][c2[1]] === CellStates.Uncovered)).length === cellValue);
+
+        //Get the cells around the safe 1's that are covered
+        const covered = safe.map(c1 => this.getSurroundingCells(c1[0], c1[1])
+            .filter(c2 => this.cellTypes[c2[0]][c2[1]] === CellTypes.Clear &&
+                this.cellStates[c2[0]][c2[1]] === CellStates.Covered))
+            .reduce((a, b) => a.concat(b));
+
+        //Pick one at random and reveal it (might need filtering to unique cells)
+        if (covered.length > 0) {
+            const random = covered[randomInt(0, covered.length - 1)];
+
+            this.revealFromCell(random[0], random[1], points);
+        }
     }
 }

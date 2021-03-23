@@ -38,7 +38,7 @@ export class Shop {
                         this.upgradeWidth, this.upgradeHeight)) {
                         if (points.getPoints() >= x.cost) {
                             points.subtractPoints(x.cost);
-                            upgradeManager.unlockUpgrade(x.upgrade)
+                            upgradeManager.unlockUpgrade(x.upgrade);
                         }
                     }
                 });
