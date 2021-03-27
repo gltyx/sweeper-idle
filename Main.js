@@ -431,10 +431,22 @@ define("Game/Enums/Upgrades", ["require", "exports"], function (require, exports
     exports.Upgrades = void 0;
     var Upgrades;
     (function (Upgrades) {
-        Upgrades[Upgrades["CellUncover1"] = 1] = "CellUncover1";
-        Upgrades[Upgrades["CellUncover2"] = 2] = "CellUncover2";
-        Upgrades[Upgrades["CellUncover3"] = 3] = "CellUncover3";
-        Upgrades[Upgrades["CellUncover4"] = 4] = "CellUncover4";
+        Upgrades[Upgrades["Revealer1"] = 1] = "Revealer1";
+        Upgrades[Upgrades["Revealer2"] = 2] = "Revealer2";
+        Upgrades[Upgrades["Revealer3"] = 3] = "Revealer3";
+        Upgrades[Upgrades["Revealer4"] = 4] = "Revealer4";
+        Upgrades[Upgrades["Flagger1"] = 5] = "Flagger1";
+        Upgrades[Upgrades["Flagger2"] = 6] = "Flagger2";
+        Upgrades[Upgrades["Flagger3"] = 7] = "Flagger3";
+        Upgrades[Upgrades["Flagger4"] = 8] = "Flagger4";
+        Upgrades[Upgrades["RevealerSpeed1"] = 9] = "RevealerSpeed1";
+        Upgrades[Upgrades["RevealerSpeed2"] = 10] = "RevealerSpeed2";
+        Upgrades[Upgrades["RevealerSpeed3"] = 11] = "RevealerSpeed3";
+        Upgrades[Upgrades["RevealerSpeed4"] = 12] = "RevealerSpeed4";
+        Upgrades[Upgrades["FlaggerSpeed1"] = 13] = "FlaggerSpeed1";
+        Upgrades[Upgrades["FlaggerSpeed2"] = 14] = "FlaggerSpeed2";
+        Upgrades[Upgrades["FlaggerSpeed3"] = 15] = "FlaggerSpeed3";
+        Upgrades[Upgrades["FlaggerSpeed4"] = 16] = "FlaggerSpeed4";
     })(Upgrades = exports.Upgrades || (exports.Upgrades = {}));
 });
 define("Game/Classes/Camera", ["require", "exports", "Boilerplate/Classes/Vector2", "Boilerplate/Enums/MouseButton", "Boilerplate/Enums/Scroll"], function (require, exports, Vector2_2, MouseButton_2, Scroll_2) {
@@ -617,10 +629,26 @@ define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrade
             this.unlockedUpgrades = [];
         }
         UpgradeManager.prototype.initialize = function () {
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover1, "Crude Automatic Revealer", "Automatically reveals safe cells around cells with 1 mine nearby.", 100, "RVLR1", Colours_2.Colours.green, []));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover2, "Basic Automatic Revealer", "Automatically reveals safe cells around cells with 2 mines nearby.", 250, "RVLR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.CellUncover1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover3, "Advanced Automatic Revealer", "Automatically reveals safe cells around cells with 3 mines nearby.", 500, "RVLR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.CellUncover2]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.CellUncover4, "Enhanced Automatic Revealer", "Automatically reveals safe cells around cells with 4 mines nearby.", 1000, "RVLR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.CellUncover3]));
+            //Revealers
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer1, "Simple Automatic Revealer", "Automatically reveals safe cells around cells with 1 mine nearby.", 100, "RVLR1", Colours_2.Colours.green, []));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer2, "Basic Automatic Revealer", "Automatically reveals safe cells around cells with 2 mines nearby.", 250, "RVLR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer3, "Advanced Automatic Revealer", "Automatically reveals safe cells around cells with 3 mines nearby.", 500, "RVLR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer4, "Enhanced Automatic Revealer", "Automatically reveals safe cells around cells with 4 mines nearby.", 1000, "RVLR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer3]));
+            //Flaggers
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger1, "Simple Automatic Flagger", "Automatically flags mines around cells with 1 mine nearby.", 100, "FLGR1", Colours_2.Colours.green, []));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger2, "Basic Automatic Flagger", "Automatically flags mines around cells with 2 mines nearby.", 250, "FLGR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger3, "Advanced Automatic Flagger", "Automatically flags mines around cells with 3 mines nearby.", 500, "FLGR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger4, "Enhanced Automatic Flagger", "Automatically flags mines around cells with 4 mines nearby.", 1000, "FLGR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger3]));
+            //Revealer speed
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed1, "Solar Powered Revealers", "Increases revealer speed by 50%", 250, "RSPD1", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed2, "Wind Powered Revealers", "Increases revealer speed by 50%", 500, "RSPD2", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed3, "Coal Powered Revealers", "Increases revealer speed by 50%", 1000, "RSPD3", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed4, "Nuclear Powered Revealers", "Increases revealer speed by 50%", 2500, "RSPD4", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed3]));
+            //Flagger speed
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed1, "Solar Powered Flaggers", "Increases flagger speed by 50%", 250, "FSPD1", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed2, "Wind Powered Flaggers", "Increases flagger speed by 50%", 500, "FSPD2", Colours_2.Colours.green, [Upgrades_1.Upgrades.FlaggerSpeed1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed3, "Coal Powered Flaggers", "Increases flagger speed by 50%", 1000, "FSPD3", Colours_2.Colours.green, [Upgrades_1.Upgrades.FlaggerSpeed2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed4, "Nuclear Powered Flaggers", "Increases flagger speed by 50%", 2500, "FSPD4", Colours_2.Colours.green, [Upgrades_1.Upgrades.FlaggerSpeed3]));
         };
         UpgradeManager.prototype.getAvailableUpgrades = function () {
             var _this = this;
@@ -639,6 +667,30 @@ define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrade
         UpgradeManager.prototype.isUpgradeUnlocked = function (upgrade) {
             return this.unlockedUpgrades.some(function (x) { return x === upgrade; });
         };
+        UpgradeManager.prototype.getRevealerSpeed = function () {
+            var speed = 1;
+            if (this.isUpgradeUnlocked(Upgrades_1.Upgrades.RevealerSpeed1))
+                speed *= 1.5;
+            if (this.isUpgradeUnlocked(Upgrades_1.Upgrades.RevealerSpeed2))
+                speed *= 1.5;
+            if (this.isUpgradeUnlocked(Upgrades_1.Upgrades.RevealerSpeed3))
+                speed *= 1.5;
+            if (this.isUpgradeUnlocked(Upgrades_1.Upgrades.RevealerSpeed4))
+                speed *= 1.5;
+            return speed;
+        };
+        UpgradeManager.prototype.getFlaggerSpeed = function () {
+            var speed = 1;
+            if (this.isUpgradeUnlocked(Upgrades_1.Upgrades.FlaggerSpeed1))
+                speed *= 1.5;
+            if (this.isUpgradeUnlocked(Upgrades_1.Upgrades.FlaggerSpeed2))
+                speed *= 1.5;
+            if (this.isUpgradeUnlocked(Upgrades_1.Upgrades.FlaggerSpeed3))
+                speed *= 1.5;
+            if (this.isUpgradeUnlocked(Upgrades_1.Upgrades.FlaggerSpeed4))
+                speed *= 1.5;
+            return speed;
+        };
         return UpgradeManager;
     }());
     exports.UpgradeManager = UpgradeManager;
@@ -653,6 +705,10 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/GameBase
             this.cellUncover2Timer = 0;
             this.cellUncover3Timer = 0;
             this.cellUncover4Timer = 0;
+            this.flagger1Timer = 0;
+            this.flagger2Timer = 0;
+            this.flagger3Timer = 0;
+            this.flagger4Timer = 0;
             this.cellValues = Functions_2.createMultidimensionalArray(width, height, 0);
             this.cellTypes = Functions_2.createMultidimensionalArray(width, height, CellTypes_1.CellTypes.Clear);
             this.cellStates = Functions_2.createMultidimensionalArray(width, height, CellStates_1.CellStates.Covered);
@@ -698,34 +754,64 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/GameBase
                     }
                 }
             }
+            var flaggerSpeed = upgradeManager.getFlaggerSpeed();
+            var revealerSpeed = upgradeManager.getRevealerSpeed();
             //TODO: refactor this thing so that multiple upgrades can be run more efficiently
-            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.CellUncover1)) {
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.Revealer1)) {
                 if (this.cellUncover1Timer <= 0) {
                     this.cellUncover1Timer += 1;
                     this.runRevealerUpgrade(1, points);
                 }
-                this.cellUncover1Timer -= GameBase_2.GameBase.updateTime;
+                this.cellUncover1Timer -= GameBase_2.GameBase.updateTime * revealerSpeed;
             }
-            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.CellUncover2)) {
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.Revealer2)) {
                 if (this.cellUncover2Timer <= 0) {
                     this.cellUncover2Timer += 1;
                     this.runRevealerUpgrade(2, points);
                 }
-                this.cellUncover2Timer -= GameBase_2.GameBase.updateTime;
+                this.cellUncover2Timer -= GameBase_2.GameBase.updateTime * revealerSpeed;
             }
-            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.CellUncover3)) {
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.Revealer3)) {
                 if (this.cellUncover3Timer <= 0) {
                     this.cellUncover3Timer += 1;
                     this.runRevealerUpgrade(3, points);
                 }
-                this.cellUncover3Timer -= GameBase_2.GameBase.updateTime;
+                this.cellUncover3Timer -= GameBase_2.GameBase.updateTime * revealerSpeed;
             }
-            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.CellUncover4)) {
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.Revealer4)) {
                 if (this.cellUncover4Timer <= 0) {
                     this.cellUncover4Timer += 1;
                     this.runRevealerUpgrade(4, points);
                 }
-                this.cellUncover4Timer -= GameBase_2.GameBase.updateTime;
+                this.cellUncover4Timer -= GameBase_2.GameBase.updateTime * revealerSpeed;
+            }
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.Flagger1)) {
+                if (this.flagger1Timer <= 0) {
+                    this.flagger1Timer += 1;
+                    this.runFlaggerUpgrade(1, points);
+                }
+                this.flagger1Timer -= GameBase_2.GameBase.updateTime * flaggerSpeed;
+            }
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.Flagger2)) {
+                if (this.flagger2Timer <= 0) {
+                    this.flagger2Timer += 1;
+                    this.runFlaggerUpgrade(2, points);
+                }
+                this.flagger2Timer -= GameBase_2.GameBase.updateTime * flaggerSpeed;
+            }
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.Flagger3)) {
+                if (this.flagger3Timer <= 0) {
+                    this.flagger3Timer += 1;
+                    this.runFlaggerUpgrade(3, points);
+                }
+                this.flagger3Timer -= GameBase_2.GameBase.updateTime * flaggerSpeed;
+            }
+            if (upgradeManager.isUpgradeUnlocked(Upgrades_2.Upgrades.Flagger4)) {
+                if (this.flagger4Timer <= 0) {
+                    this.flagger4Timer += 1;
+                    this.runFlaggerUpgrade(4, points);
+                }
+                this.flagger4Timer -= GameBase_2.GameBase.updateTime * flaggerSpeed;
             }
         };
         Grid.prototype.draw = function (context, camera) {
@@ -845,7 +931,7 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/GameBase
         };
         Grid.prototype.runRevealerUpgrade = function (cellValue, points) {
             var _this = this;
-            //Get all cells that are 1, not a mine, and uncovered (a visible 1 basically)
+            //Get all cells have the cellValue, not a mine, and uncovered
             var uncovered = [];
             for (var x = 0; x < this.width; x++) {
                 for (var y = 0; y < this.height; y++) {
@@ -856,12 +942,12 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/GameBase
                     }
                 }
             }
-            //Filter to cells that have 1 surrounding exploded or flagged mine
+            //Filter to cells that have the cellValue surrounding exploded or flagged mine
             var safe = uncovered.filter(function (c1) { return _this.getSurroundingCells(c1[0], c1[1])
                 .filter(function (c2) { return _this.cellTypes[c2[0]][c2[1]] === CellTypes_1.CellTypes.Mine &&
                 (_this.cellStates[c2[0]][c2[1]] === CellStates_1.CellStates.Flagged ||
                     _this.cellStates[c2[0]][c2[1]] === CellStates_1.CellStates.Uncovered); }).length === cellValue; });
-            //Get the cells around the safe 1's that are covered
+            //Get the cells around the safe cell that are covered
             var covered = safe.map(function (c1) { return _this.getSurroundingCells(c1[0], c1[1])
                 .filter(function (c2) { return _this.cellTypes[c2[0]][c2[1]] === CellTypes_1.CellTypes.Clear &&
                 _this.cellStates[c2[0]][c2[1]] === CellStates_1.CellStates.Covered; }); })
@@ -870,6 +956,34 @@ define("Game/Classes/Grid", ["require", "exports", "Boilerplate/Classes/GameBase
             if (covered.length > 0) {
                 var random = covered[Functions_2.randomInt(0, covered.length - 1)];
                 this.revealFromCell(random[0], random[1], points);
+            }
+        };
+        Grid.prototype.runFlaggerUpgrade = function (cellValue, points) {
+            var _this = this;
+            //Get all cells have the cellValue, not a mine, and uncovered
+            var uncovered = [];
+            for (var x = 0; x < this.width; x++) {
+                for (var y = 0; y < this.height; y++) {
+                    if (this.cellValues[x][y] === cellValue &&
+                        this.cellTypes[x][y] === CellTypes_1.CellTypes.Clear &&
+                        this.cellStates[x][y] === CellStates_1.CellStates.Uncovered) {
+                        uncovered.push([x, y]);
+                    }
+                }
+            }
+            //Filter to cells that have the cellValue or less covered surrounding cells
+            var safe = uncovered.filter(function (c1) { return _this.getSurroundingCells(c1[0], c1[1])
+                .filter(function (c2) { return _this.cellStates[c2[0]][c2[1]] === CellStates_1.CellStates.Covered ||
+                _this.cellStates[c2[0]][c2[1]] === CellStates_1.CellStates.Flagged; }).length <= cellValue; });
+            //Get the cells around the safe cell that are covered
+            var covered = safe.map(function (c1) { return _this.getSurroundingCells(c1[0], c1[1])
+                .filter(function (c2) { return _this.cellStates[c2[0]][c2[1]] === CellStates_1.CellStates.Covered; }); })
+                .reduce(function (a, b) { return a.concat(b); });
+            //Pick one at random and flag it (might need filtering to unique cells)
+            if (covered.length > 0) {
+                var random = covered[Functions_2.randomInt(0, covered.length - 1)];
+                this.cellStates[random[0]][random[1]] = CellStates_1.CellStates.Flagged;
+                points.addPoints(20);
             }
         };
         return Grid;
@@ -894,7 +1008,7 @@ define("Game/Classes/Tooltip", ["require", "exports", "Boilerplate/Enums/Align",
                 var titleWidth = context.measureString(this.title, 30, Fonts_3.Fonts.Arial, Align_4.Align.Left).width;
                 var textWidth = context.measureString(this.text, 24, Fonts_3.Fonts.Arial, Align_4.Align.Left).width;
                 if (this.cost != null)
-                    titleWidth += context.measureString(this.costPrefix + this.cost, 24, Fonts_3.Fonts.Arial, Align_4.Align.Right).width;
+                    titleWidth += context.measureString(this.costPrefix + this.cost, 24, Fonts_3.Fonts.Arial, Align_4.Align.Right).width + 10;
                 var width = Math.max(titleWidth, textWidth) + 20;
                 context.drawBorderedRectangle(this.x, this.y, width, 80, Colours_4.Colours.background, Colours_4.Colours.boxBorder);
                 context.drawString(this.title, this.x + 10, this.y + 10, 30, Fonts_3.Fonts.Arial, Colours_4.Colours.boxBorder, Align_4.Align.TopLeft);

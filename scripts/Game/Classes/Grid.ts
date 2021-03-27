@@ -26,6 +26,11 @@ export class Grid {
     private cellUncover3Timer = 0;
     private cellUncover4Timer = 0;
 
+    private flagger1Timer = 0;
+    private flagger2Timer = 0;
+    private flagger3Timer = 0;
+    private flagger4Timer = 0;
+
     constructor(width: number, height: number) {
         this.cellValues = createMultidimensionalArray(width, height, 0);
         this.cellTypes = createMultidimensionalArray(width, height, CellTypes.Clear);
@@ -79,42 +84,85 @@ export class Grid {
             }
         }
 
+        const flaggerSpeed = upgradeManager.getFlaggerSpeed();
+        const revealerSpeed = upgradeManager.getRevealerSpeed();
+
         //TODO: refactor this thing so that multiple upgrades can be run more efficiently
-        if (upgradeManager.isUpgradeUnlocked(Upgrades.CellUncover1)) {
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.Revealer1)) {
             if (this.cellUncover1Timer <= 0) {
                 this.cellUncover1Timer += 1;
 
                 this.runRevealerUpgrade(1, points);
             }
 
-            this.cellUncover1Timer -= GameBase.updateTime;
+            this.cellUncover1Timer -= GameBase.updateTime * revealerSpeed;
         }
-        if (upgradeManager.isUpgradeUnlocked(Upgrades.CellUncover2)) {
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.Revealer2)) {
             if (this.cellUncover2Timer <= 0) {
                 this.cellUncover2Timer += 1;
 
                 this.runRevealerUpgrade(2, points);
             }
 
-            this.cellUncover2Timer -= GameBase.updateTime;
+            this.cellUncover2Timer -= GameBase.updateTime * revealerSpeed;
         }
-        if (upgradeManager.isUpgradeUnlocked(Upgrades.CellUncover3)) {
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.Revealer3)) {
             if (this.cellUncover3Timer <= 0) {
                 this.cellUncover3Timer += 1;
 
                 this.runRevealerUpgrade(3, points);
             }
 
-            this.cellUncover3Timer -= GameBase.updateTime;
+            this.cellUncover3Timer -= GameBase.updateTime * revealerSpeed;
         }
-        if (upgradeManager.isUpgradeUnlocked(Upgrades.CellUncover4)) {
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.Revealer4)) {
             if (this.cellUncover4Timer <= 0) {
                 this.cellUncover4Timer += 1;
 
                 this.runRevealerUpgrade(4, points);
             }
 
-            this.cellUncover4Timer -= GameBase.updateTime;
+            this.cellUncover4Timer -= GameBase.updateTime * revealerSpeed;
+        }
+
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.Flagger1)) {
+            if (this.flagger1Timer <= 0) {
+                this.flagger1Timer += 1;
+
+                this.runFlaggerUpgrade(1, points);
+            }
+
+            this.flagger1Timer -= GameBase.updateTime * flaggerSpeed;
+        }
+
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.Flagger2)) {
+            if (this.flagger2Timer <= 0) {
+                this.flagger2Timer += 1;
+
+                this.runFlaggerUpgrade(2, points);
+            }
+
+            this.flagger2Timer -= GameBase.updateTime * flaggerSpeed;
+        }
+
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.Flagger3)) {
+            if (this.flagger3Timer <= 0) {
+                this.flagger3Timer += 1;
+
+                this.runFlaggerUpgrade(3, points);
+            }
+
+            this.flagger3Timer -= GameBase.updateTime * flaggerSpeed;
+        }
+
+        if (upgradeManager.isUpgradeUnlocked(Upgrades.Flagger4)) {
+            if (this.flagger4Timer <= 0) {
+                this.flagger4Timer += 1;
+
+                this.runFlaggerUpgrade(4, points);
+            }
+
+            this.flagger4Timer -= GameBase.updateTime * flaggerSpeed;
         }
     }
 
@@ -257,7 +305,7 @@ export class Grid {
     }
 
     runRevealerUpgrade(cellValue: number, points: Points) {
-        //Get all cells that are 1, not a mine, and uncovered (a visible 1 basically)
+        //Get all cells have the cellValue, not a mine, and uncovered
         const uncovered: number[][] = [];
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
@@ -269,13 +317,13 @@ export class Grid {
             }
         }
 
-        //Filter to cells that have 1 surrounding exploded or flagged mine
+        //Filter to cells that have the cellValue surrounding exploded or flagged mine
         const safe = uncovered.filter(c1 => this.getSurroundingCells(c1[0], c1[1])
             .filter(c2 => this.cellTypes[c2[0]][c2[1]] === CellTypes.Mine &&
                 (this.cellStates[c2[0]][c2[1]] === CellStates.Flagged ||
                     this.cellStates[c2[0]][c2[1]] === CellStates.Uncovered)).length === cellValue);
 
-        //Get the cells around the safe 1's that are covered
+        //Get the cells around the safe cell that are covered
         const covered = safe.map(c1 => this.getSurroundingCells(c1[0], c1[1])
             .filter(c2 => this.cellTypes[c2[0]][c2[1]] === CellTypes.Clear &&
                 this.cellStates[c2[0]][c2[1]] === CellStates.Covered))
@@ -286,6 +334,38 @@ export class Grid {
             const random = covered[randomInt(0, covered.length - 1)];
 
             this.revealFromCell(random[0], random[1], points);
+        }
+    }
+
+    runFlaggerUpgrade(cellValue: number, points: Points) {
+        //Get all cells have the cellValue, not a mine, and uncovered
+        const uncovered: number[][] = [];
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                if (this.cellValues[x][y] === cellValue &&
+                    this.cellTypes[x][y] === CellTypes.Clear &&
+                    this.cellStates[x][y] === CellStates.Uncovered) {
+                    uncovered.push([x, y]);
+                }
+            }
+        }
+
+        //Filter to cells that have the cellValue or less covered surrounding cells
+        const safe = uncovered.filter(c1 => this.getSurroundingCells(c1[0], c1[1])
+            .filter(c2 => this.cellStates[c2[0]][c2[1]] === CellStates.Covered ||
+                this.cellStates[c2[0]][c2[1]] === CellStates.Flagged).length <= cellValue);
+
+        //Get the cells around the safe cell that are covered
+        const covered = safe.map(c1 => this.getSurroundingCells(c1[0], c1[1])
+            .filter(c2 => this.cellStates[c2[0]][c2[1]] === CellStates.Covered))
+            .reduce((a, b) => a.concat(b));
+
+        //Pick one at random and flag it (might need filtering to unique cells)
+        if (covered.length > 0) {
+            const random = covered[randomInt(0, covered.length - 1)];
+
+            this.cellStates[random[0]][random[1]] = CellStates.Flagged;
+            points.addPoints(20);
         }
     }
 }

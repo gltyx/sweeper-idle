@@ -24,7 +24,7 @@ export class Tooltip {
             const textWidth = context.measureString(this.text, 24, Fonts.Arial, Align.Left).width;
 
             if (this.cost != null)
-                titleWidth += context.measureString(this.costPrefix + this.cost, 24, Fonts.Arial, Align.Right).width;
+                titleWidth += context.measureString(this.costPrefix + this.cost, 24, Fonts.Arial, Align.Right).width + 10;
 
             const width = Math.max(titleWidth, textWidth) + 20;
 
