@@ -630,20 +630,20 @@ define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrade
         }
         UpgradeManager.prototype.initialize = function () {
             //Revealers
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer1, "简单的自动显示器", "自动显示附近有 1 个地雷的单元周围的安全单元.", 100, "RVLR1", Colours_2.Colours.green, []));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer2, "基本型自动显示器", "自动显示附近有 2 个地雷的单元周围的安全单元.", 250, "RVLR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer3, "高级自动显示器", "自动显示附近有 3 个地雷的单元周围的安全单元.", 500, "RVLR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer2]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer4, "增强型自动显示器", "自动显示附近有 4 个地雷的单元周围的安全单元.", 1000, "RVLR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer3]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer1, "简单的自动揭示器", "自动揭示附近有 1 个地雷的单元周围的安全单元.", 100, "RVLR1", Colours_2.Colours.green, []));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer2, "基本型自动揭示器", "自动揭示附近有 2 个地雷的单元周围的安全单元.", 250, "RVLR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer3, "高级自动揭示器", "自动揭示附近有 3 个地雷的单元周围的安全单元.", 500, "RVLR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer4, "增强型自动揭示器", "自动揭示附近有 4 个地雷的单元周围的安全单元.", 1000, "RVLR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer3]));
             //Flaggers
             this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger1, "简单的自动标记器", "自动标记附近有 1 个地雷的单元周围的地雷.", 100, "FLGR1", Colours_2.Colours.green, []));
             this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger2, "基础自动标记器", "自动标记附近有 2 个地雷的单元周围的地雷.", 250, "FLGR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger1]));
             this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger3, "高级自动标记器", "自动标记附近有 3 个地雷的单元周围的地雷.", 500, "FLGR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger2]));
             this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger4, "增强型自动标记器", "自动标记附近有 4 个地雷的单元周围的地雷.", 1000, "FLGR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger3]));
             //Revealer speed
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed1, "太阳能揭示器", "显示速度提高 50%", 250, "RSPD1", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed2, "风能揭示器", "显示速度提高 50%", 500, "RSPD2", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed3, "热能揭示器", "显示速度提高 50%", 1000, "RSPD3", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed2]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed4, "核能揭示器", "显示速度提高 50%", 2500, "RSPD4", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed3]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed1, "太阳能揭示器", "揭示速度提高 50%", 250, "RSPD1", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed2, "风能揭示器", "揭示速度提高 50%", 500, "RSPD2", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed3, "热能揭示器", "揭示速度提高 50%", 1000, "RSPD3", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed4, "核能揭示器", "揭示速度提高 50%", 2500, "RSPD4", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed3]));
             //Flagger speed
             this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed1, "太阳能标记器", "标记速度提高 50%", 250, "FSPD1", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger1]));
             this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed2, "风能标记器", "标记速度提高 50%", 500, "FSPD2", Colours_2.Colours.green, [Upgrades_1.Upgrades.FlaggerSpeed1]));
