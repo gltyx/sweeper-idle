@@ -568,7 +568,7 @@ define("Game/Classes/Points", ["require", "exports", "Boilerplate/Classes/GameBa
         Points.prototype.update = function (context, input) {
             this.particles.forEach(function (x) { return x.life -= GameBase_1.GameBase.updateTime; });
             this.particles = this.particles.filter(function (x) { return x.life > 0; });
-            this.pointsText = "Points: " + this.points;
+            this.pointsText = "分数: " + this.points;
             var measurement = context.measureString(this.pointsText, 48, Fonts_1.Fonts.Arial, Align_2.Align.Center);
             this.rectX = 20;
             this.rectY = context.canvas.height - 70;
@@ -630,25 +630,25 @@ define("Game/Classes/UpgradeManager", ["require", "exports", "Game/Enums/Upgrade
         }
         UpgradeManager.prototype.initialize = function () {
             //Revealers
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer1, "Simple Automatic Revealer", "Automatically reveals safe cells around cells with 1 mine nearby.", 100, "RVLR1", Colours_2.Colours.green, []));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer2, "Basic Automatic Revealer", "Automatically reveals safe cells around cells with 2 mines nearby.", 250, "RVLR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer3, "Advanced Automatic Revealer", "Automatically reveals safe cells around cells with 3 mines nearby.", 500, "RVLR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer2]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer4, "Enhanced Automatic Revealer", "Automatically reveals safe cells around cells with 4 mines nearby.", 1000, "RVLR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer3]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer1, "简单的自动显示器", "自动显示附近有 1 个地雷的单元周围的安全单元.", 100, "RVLR1", Colours_2.Colours.green, []));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer2, "基本型自动显示器", "自动显示附近有 2 个地雷的单元周围的安全单元.", 250, "RVLR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer3, "高级自动显示器", "自动显示附近有 3 个地雷的单元周围的安全单元.", 500, "RVLR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Revealer4, "增强型自动显示器", "自动显示附近有 4 个地雷的单元周围的安全单元.", 1000, "RVLR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer3]));
             //Flaggers
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger1, "Simple Automatic Flagger", "Automatically flags mines around cells with 1 mine nearby.", 100, "FLGR1", Colours_2.Colours.green, []));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger2, "Basic Automatic Flagger", "Automatically flags mines around cells with 2 mines nearby.", 250, "FLGR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger3, "Advanced Automatic Flagger", "Automatically flags mines around cells with 3 mines nearby.", 500, "FLGR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger2]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger4, "Enhanced Automatic Flagger", "Automatically flags mines around cells with 4 mines nearby.", 1000, "FLGR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger3]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger1, "简单的自动标记器", "自动标记附近有 1 个地雷的单元周围的地雷.", 100, "FLGR1", Colours_2.Colours.green, []));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger2, "基础自动标记器", "自动标记附近有 2 个地雷的单元周围的地雷.", 250, "FLGR2", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger3, "高级自动标记器", "自动标记附近有 3 个地雷的单元周围的地雷.", 500, "FLGR3", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.Flagger4, "增强型自动标记器", "自动标记附近有 4 个地雷的单元周围的地雷.", 1000, "FLGR4", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger3]));
             //Revealer speed
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed1, "Solar Powered Revealers", "Increases revealer speed by 50%", 250, "RSPD1", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed2, "Wind Powered Revealers", "Increases revealer speed by 50%", 500, "RSPD2", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed3, "Coal Powered Revealers", "Increases revealer speed by 50%", 1000, "RSPD3", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed2]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed4, "Nuclear Powered Revealers", "Increases revealer speed by 50%", 2500, "RSPD4", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed3]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed1, "太阳能揭示器", "显示速度提高 50%", 250, "RSPD1", Colours_2.Colours.green, [Upgrades_1.Upgrades.Revealer1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed2, "风能揭示器", "显示速度提高 50%", 500, "RSPD2", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed3, "热能揭示器", "显示速度提高 50%", 1000, "RSPD3", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.RevealerSpeed4, "核能揭示器", "显示速度提高 50%", 2500, "RSPD4", Colours_2.Colours.green, [Upgrades_1.Upgrades.RevealerSpeed3]));
             //Flagger speed
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed1, "Solar Powered Flaggers", "Increases flagger speed by 50%", 250, "FSPD1", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed2, "Wind Powered Flaggers", "Increases flagger speed by 50%", 500, "FSPD2", Colours_2.Colours.green, [Upgrades_1.Upgrades.FlaggerSpeed1]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed3, "Coal Powered Flaggers", "Increases flagger speed by 50%", 1000, "FSPD3", Colours_2.Colours.green, [Upgrades_1.Upgrades.FlaggerSpeed2]));
-            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed4, "Nuclear Powered Flaggers", "Increases flagger speed by 50%", 2500, "FSPD4", Colours_2.Colours.green, [Upgrades_1.Upgrades.FlaggerSpeed3]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed1, "太阳能标记器", "标记速度提高 50%", 250, "FSPD1", Colours_2.Colours.green, [Upgrades_1.Upgrades.Flagger1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed2, "风能标记器", "标记速度提高 50%", 500, "FSPD2", Colours_2.Colours.green, [Upgrades_1.Upgrades.FlaggerSpeed1]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed3, "热能标记器", "标记速度提高 50%", 1000, "FSPD3", Colours_2.Colours.green, [Upgrades_1.Upgrades.FlaggerSpeed2]));
+            this.upgradeInfo.push(new UpgradeInfo_1.UpgradeInfo(Upgrades_1.Upgrades.FlaggerSpeed4, "核能标记器", "标记速度提高 50%", 2500, "FSPD4", Colours_2.Colours.green, [Upgrades_1.Upgrades.FlaggerSpeed3]));
         };
         UpgradeManager.prototype.getAvailableUpgrades = function () {
             var _this = this;
@@ -997,7 +997,7 @@ define("Game/Classes/Tooltip", ["require", "exports", "Boilerplate/Enums/Align",
     var Tooltip = /** @class */ (function () {
         function Tooltip() {
             this.hasTooltip = false;
-            this.costPrefix = "Cost: ";
+            this.costPrefix = "成本: ";
         }
         Tooltip.prototype.update = function () {
             this.hasTooltip = false;
@@ -1077,7 +1077,7 @@ define("Game/Classes/Shop", ["require", "exports", "Boilerplate/Enums/Align", "B
             var upgrades = upgradeManager.getAvailableUpgrades();
             context.drawBorderedRectangle(this.mainRectX, this.mainRectY, this.mainRectW, this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset), Colours_5.Colours.boxUncovered, Colours_5.Colours.boxBorder);
             context.drawBorderedRectangle(this.titleRectX, this.titleRectY, this.titleRectW, this.titleRectH, Colours_5.Colours.boxUncovered, Colours_5.Colours.boxBorder);
-            context.drawString('Shop', this.titleRectX + this.titleRectW / 2, this.titleRectY + this.titleRectH / 2 + 4, 48, Fonts_4.Fonts.Arial, Colours_5.Colours.boxBorder, Align_5.Align.Center);
+            context.drawString('商店', this.titleRectX + this.titleRectW / 2, this.titleRectY + this.titleRectH / 2 + 4, 48, Fonts_4.Fonts.Arial, Colours_5.Colours.boxBorder, Align_5.Align.Center);
             upgrades.forEach(function (x, i) {
                 var colour;
                 if (points.getPoints() < x.cost)

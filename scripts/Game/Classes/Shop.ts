@@ -66,7 +66,7 @@ export class Shop {
             this.upgradeOffset + ((upgrades.length - upgrades.length % 3) / 3 + 1) * (this.upgradeHeight + this.upgradeOffset),
             Colours.boxUncovered, Colours.boxBorder);
         context.drawBorderedRectangle(this.titleRectX, this.titleRectY, this.titleRectW, this.titleRectH, Colours.boxUncovered, Colours.boxBorder);
-        context.drawString('Shop', this.titleRectX + this.titleRectW / 2, this.titleRectY + this.titleRectH / 2 + 4, 48, Fonts.Arial, Colours.boxBorder, Align.Center);
+        context.drawString('商店', this.titleRectX + this.titleRectW / 2, this.titleRectY + this.titleRectH / 2 + 4, 48, Fonts.Arial, Colours.boxBorder, Align.Center);
 
         upgrades.forEach((x, i) => {
             let colour: Colour;
